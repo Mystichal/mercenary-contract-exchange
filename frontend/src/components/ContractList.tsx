@@ -4,6 +4,7 @@ import { useCurrentAccount } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { PACKAGE_ID, REGISTRY_ID, CLOCK_ID, MISSION_TYPES, STATUS_LABELS } from "@/lib/config";
+import { displayName, systemById, SECURITY_COLORS } from "@/lib/systems";
 
 interface Props { onCreateClick: () => void }
 
@@ -91,8 +92,13 @@ export default function ContractList({ onCreateClick }: Props) {
 
               {/* Details */}
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, color: "#8aafd4", marginBottom: 4 }}>
-                  System {p?.solar_system_id ?? "?"}
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 2, display: "flex", alignItems: "center", gap: 8 }}>
+                  {displayName(p?.solar_system_id ?? 0)}
+                  {p?.solar_system_id && (() => { const sys = systemById(Number(p.solar_system_id)); return sys ? (
+                    <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: `${SECURITY_COLORS[sys.security]}22`, color: SECURITY_COLORS[sys.security], fontWeight: 600 }}>
+                      {sys.security.replace("sec","").toUpperCase()}
+                    </span>
+                  ) : null; })()}
                 </div>
                 <div style={{ fontSize: 13, color: "#c8dff5", fontFamily: "monospace" }}>
                   Issuer: {p?.issuer?.slice(0, 8)}...{p?.issuer?.slice(-6)}

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Transaction } from "@mysten/sui/transactions";
 import { useSignAndExecuteTransaction, useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 import { PACKAGE_ID, CLOCK_ID, MISSION_TYPES } from "@/lib/config";
+import SystemInput from "./SystemInput";
 
 interface Props { onClose: () => void }
 
@@ -11,7 +12,8 @@ export default function CreateContractModal({ onClose }: Props) {
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
 
   const [missionType, setMissionType] = useState(2);
-  const [solarSystemId, setSolarSystemId] = useState("");
+  const [systemName, setSystemName] = useState("");
+  const [systemId, setSystemId] = useState<number | null>(null);
   const [rewardSui, setRewardSui] = useState("");
   const [bondSui, setBondSui] = useState("");
   const [deadlineDays, setDeadlineDays] = useState("7");
@@ -27,8 +29,8 @@ export default function CreateContractModal({ onClose }: Props) {
   function handleCreate() {
     setError("");
     if (!account) return;
-    if (!solarSystemId || !rewardSui || !bondSui) {
-      setError("Fill in all fields");
+    if (!systemId || !rewardSui || !bondSui) {
+      setError(!systemId ? "Select a solar system from the list" : "Fill in all fields");
       return;
     }
 
@@ -48,7 +50,7 @@ export default function CreateContractModal({ onClose }: Props) {
       arguments: [
         tx.pure.u8(missionType),
         tx.pure.vector("u8", []),        // target_id (empty for now)
-        tx.pure.u64(BigInt(solarSystemId || "0")),
+        tx.pure.u64(BigInt(systemId ?? 0)),
         tx.pure.u64(deadlineMs),
         tx.pure.bool(transferable),
         rewardCoin,
@@ -97,9 +99,8 @@ export default function CreateContractModal({ onClose }: Props) {
         </div>
 
         {/* Solar system */}
-        <label style={labelStyle}>Solar System ID</label>
-        <input style={inputStyle} placeholder="e.g. 30000142"
-          value={solarSystemId} onChange={e => setSolarSystemId(e.target.value)} />
+        <label style={labelStyle}>Solar System</label>
+        <SystemInput value={systemName} onChange={(name, id) => { setSystemName(name); setSystemId(id); }} />
 
         {/* Reward */}
         <label style={labelStyle}>Reward (SUI)</label>
