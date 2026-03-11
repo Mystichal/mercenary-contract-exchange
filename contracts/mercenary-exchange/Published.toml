@@ -1,0 +1,15 @@
+# Generated on deploy — 2026-03-11
+# Transaction: HtEo2BmHtBxQZs52TLvf9RtMWj1qaYW2QF823XwvHGhn
+
+[published.testnet_utopia]
+chain-id = "4c78adac"
+published-at = "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150"
+original-id  = "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150"
+version = 1
+upgrade-capability = "0x55c965b220da6d2021c1600e5ba108de5c70fad0ad67d9f9e17f9d47fad53ec0"
+
+# Shared objects (required by frontend)
+registry-id   = "0xcd3f021b4714ce7c4d462deb1579434c711fe914a12eecbb31a224ac75990bf1"
+verifier-cap  = "0x8e169780b1d77fa865c894208577f8cf083f981ad89a4b79d46dfdb939131020"
+admin-cap     = "0x9faaee563c089942e75d48d12b30f1e08ebc638d3002b9bbea32b7bcf908fe2a"
+deployer      = "0x40589886ff1c4b7750ea8fa3df2bee8114dfeb7edf4aa6d86f7d20916c34fc85"

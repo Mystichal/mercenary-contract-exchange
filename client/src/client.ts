@@ -16,10 +16,13 @@ import type { SuiEvent } from "@mysten/sui/client";
 // TODO: update these after deploying to hackathon network on March 11
 export const CONFIG = {
     network:      "testnet" as const,
-    packageId:    "0x0", // fill after deploy
-    registryId:   "0x0", // fill after deploy (shared Registry object)
-    verifierCapId: "0x0", // fill after deploy
-    adminCapId:   "0x0",  // fill after deploy
+    packageId:    "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150",
+    registryId:   "0xcd3f021b4714ce7c4d462deb1579434c711fe914a12eecbb31a224ac75990bf1", // Shared
+    verifierCapId: "0x8e169780b1d77fa865c894208577f8cf083f981ad89a4b79d46dfdb939131020",
+    adminCapId:   "0x9faaee563c089942e75d48d12b30f1e08ebc638d3002b9bbea32b7bcf908fe2a",
+    upgradeCap:   "0x55c965b220da6d2021c1600e5ba108de5c70fad0ad67d9f9e17f9d47fad53ec0",
+    deployerAddress: "0x40589886ff1c4b7750ea8fa3df2bee8114dfeb7edf4aa6d86f7d20916c34fc85",
+    deployTxDigest: "HtEo2BmHtBxQZs52TLvf9RtMWj1qaYW2QF823XwvHGhn",
 
     // EVE Frontier world-contracts — testnet_utopia deployment
     worldContractsPackage: "0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75",
