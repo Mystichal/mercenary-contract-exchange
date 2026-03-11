@@ -1,0 +1,347 @@
+MERCENARY CONTRACT EXCHANGE
+
+A Programmable Market for Operational Risk
+Built for EVE Frontier
+Settled on Sui
+Developed for the ecosystem of CCP Games
+
+
+1. Abstract
+
+This paper presents a decentralized mercenary contract marketplace that enables tribes to issue operational missions, mercenary groups to execute them, and traders to price and exchange mission risk as financial instruments.
+
+Unlike traditional mission systems, contracts are:
+	pre-funded
+	transferable
+	objectively verified
+	automatically settled
+	denominated in native EVE tokens
+
+The system transforms operational activity into a tradable asset class, enabling price discovery for military risk, logistics execution, and territorial control.
+
+The result is a programmable war economy embedded directly into persistent world infrastructure.
+
+
+2. Problem Statement
+
+Large-scale coordination of military and logistical activity requires:
+	capital commitment
+	trust in execution
+	objective performance verification
+	risk pricing
+	liquidity
+
+Traditional mission systems lack:
+	enforceable economic guarantees
+	transferable obligations
+	market-driven pricing
+	automated settlement
+
+This creates inefficiencies:
+	underpriced risk
+	unreliable execution
+	limited capital participation
+	no secondary market for operational exposure
+
+A financial layer is required to allocate capital toward mission execution efficiently.
+
+
+3. System Overview
+
+The Mercenary Contract Exchange is a programmable infrastructure that converts missions into financial instruments.
+
+Each contract represents a conditional obligation with locked economic value.
+
+Lifecycle:
+	Tribe defines mission
+	Reward locked in escrow (EVE tokens)
+	Contract issued
+	Contract traded or assigned
+	Mission executed
+	World state verifies outcome
+	Settlement distributes funds
+
+No trust, no manual arbitration, no external enforcement.
+
+
+4. Core Design Principles
+
+4.1 Pre-Funded Execution
+All rewards exist before execution begins.
+
+4.2 Objective Verification
+World events determine success or failure.
+
+4.3 Transferable Obligations
+Contracts can be bought, sold, or reassigned.
+
+4.4 Automatic Settlement
+Smart infrastructure distributes funds deterministically.
+
+4.5 Unified Currency
+All economic activity denominated in EVE tokens.
+
+
+5. Economic Unit: EVE Token
+
+All financial activity uses a single native settlement asset.
+
+Used for:
+	mission rewards
+	mercenary collateral
+	contract trading
+	insurance premiums
+	penalties
+	platform fees
+
+This creates:
+	unified liquidity
+	transparent pricing
+	systemic economic coupling
+	measurable capital flows
+
+
+6. Financial Structure
+
+6.1 Reward Pool
+Locked by mission issuer.
+Represents payment for successful execution.
+
+6.2 Performance Collateral
+Locked by executor.
+Incentivizes completion and compensates failure.
+
+6.3 Optional Market Liquidity
+Third parties may buy or sell exposure to contract outcomes.
+
+6.4 Insurance Layer
+Risk transfer through premium-based coverage.
+
+
+7. Contract Lifecycle
+
+Stage 1 — Creation
+Issuer defines:
+	objective conditions
+	deadline
+	reward size
+	location parameters
+
+Reward transferred to escrow.
+
+Stage 2 — Acceptance or Trade
+Possible paths:
+	mercenary accepts directly
+	contract sold to trader
+	pooled funding
+	syndicated execution
+
+Ownership transferable.
+
+Stage 3 — Execution
+Real world activity produces verifiable events.
+
+Examples:
+	asset destruction
+	territorial control change
+	delivery confirmation
+	survival duration
+
+Stage 4 — Verification
+World state evaluated against contract conditions.
+
+Binary result:
+	SUCCESS or FAILURE
+
+Stage 5 — Settlement
+Automatic redistribution of EVE tokens.
+
+Success:
+	reward → executor
+	collateral returned
+
+Failure:
+	collateral slashed
+	reward returned or redistributed
+
+
+8. Market Structure
+
+Contracts behave as risk-bearing financial assets.
+
+Participants:
+Role				Function
+Tribes				Demand generation
+Mercenaries			Execution
+Traders				Risk pricing
+Insurers			Risk transfer
+Liquidity providers	Capital supply
+
+
+9. Price Formation
+
+Contract price reflects expected value.
+
+Key variables:
+	mission difficulty
+	geographic risk
+	historical success rates
+	time to completion
+	strategic importance
+	executor reputation
+
+Market participants continuously update valuations.
+
+
+10. Risk Engine
+
+Collateral requirements determined algorithmically.
+
+Example model:
+	collateral = reward × risk_score
+
+Risk score derived from:
+	combat density index
+	travel exposure
+	historical loss rates
+	objective complexity
+
+Dynamic adjustment prevents under-collateralization.
+
+
+11. Infrastructure Architecture
+
+Player Layer
+Creates demand and supply.
+
+Interface Layer
+Market terminals and contract management.
+Market Services
+Matching, pricing, analytics.
+
+Contract Infrastructure
+Lifecycle logic and settlement rules.
+
+Storage Layer
+Treasury and escrow vaults.
+
+World Event Layer
+Objective state changes.
+Verification Engine
+Outcome evaluation.
+
+
+12. Smart Contract Modules
+
+Contract Factory
+Registry
+Escrow Controller
+Settlement Engine
+Insurance Module
+Transfer Logic
+
+All implemented as deterministic programmable objects.
+
+
+13. Token Flow
+
+Success Scenario
+issuer → escrow → executor
+
+Failure Scenario
+executor collateral → penalty distribution
+issuer reward → refund or insurer
+
+
+14. Revenue Model
+
+Protocol generates income via:
+	settlement fee
+	trade fee
+	insurance spread
+	listing fee
+
+All denominated in EVE tokens.
+
+
+15. Monetary Effects
+
+The system introduces token sinks:
+	collateral destruction
+	insurance premiums
+	penalties
+	platform fees
+
+This reduces inflation and stabilizes currency velocity.
+
+16. Emergent Financial Instruments
+
+The architecture enables:
+	mission futures
+	risk swaps
+	contract bundles
+	insurance pools
+	reputation-backed credit
+
+Operational activity becomes an investable asset class.
+
+
+17. Strategic Impact
+
+The exchange functions as:
+	military procurement market
+	logistics financing system
+	decentralized insurance layer
+	intelligence pricing network
+	capital allocation engine for conflict
+
+It formalizes warfare as an economic domain.
+
+
+18. Security Model
+
+Protections include:
+	locked escrow objects
+	deterministic settlement
+	non-custodial ownership
+	world-state verification
+	pre-funded guarantees
+
+No actor can default after contract creation.
+
+
+19. Game Theory
+
+Incentives align:
+	Issuers 	→ define realistic rewards
+	Mercenaries → execute reliably
+	Traders 	→ price risk accurately
+	Insurers 	→ model probabilities
+	Protocol 	→ enforce neutrality
+
+Mispricing leads to capital loss, driving equilibrium.
+
+
+20. Roadmap
+
+Phase 1 — Contract creation + escrow
+Phase 2 — Direct mercenary acceptance
+Phase 3 — Transferable contracts
+Phase 4 — Secondary trading
+Phase 5 — Insurance markets
+Phase 6 — Derivatives and pooled risk
+
+21. Conclusion
+
+The Mercenary Contract Exchange transforms operational activity into programmable financial infrastructure.
+
+By combining:
+	deterministic settlement
+	objective world verification
+	tokenized capital
+	open market pricing
+	the system enables a fully functional risk economy embedded directly into persistent simulation.
+
+It is not merely a mission board.
+
+It is a market for force, logistics, and control.
