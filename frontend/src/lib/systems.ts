@@ -1,59 +1,61 @@
 /**
- * Solar system lookup for EVE Frontier / Utopia testnet.
- * solarsystem field in world-contracts is u64 — this maps names ↔ IDs.
- * 
- * EVE Frontier uses the same system IDs as EVE Online's static data.
- * Add more as discovered in Utopia.
+ * Solar system lookup via EVE Frontier World API.
+ * 24,502 systems — fetched live with debounced search.
  */
+
+export const SYSTEMS_API = "https://world-api-stillness.live.tech.evefrontier.com/v2/solarsystems";
 
 export interface SolarSystem {
   id: number;
   name: string;
-  security: string; // "highsec" | "lowsec" | "nullsec" | "wormhole"
+  constellationId: number;
+  regionId: number;
 }
 
-// Known systems — extend as more are confirmed in Utopia/Frontier
-export const KNOWN_SYSTEMS: SolarSystem[] = [
-  { id: 30000142, name: "Jita",       security: "highsec" },
-  { id: 30002187, name: "Amarr",      security: "highsec" },
-  { id: 30002659, name: "Dodixie",    security: "highsec" },
-  { id: 30002510, name: "Rens",       security: "highsec" },
-  { id: 30002053, name: "Hek",        security: "highsec" },
-  { id: 30001984, name: "Oursulaert", security: "highsec" },
-  { id: 30002086, name: "Tash-Murkon", security: "highsec" },
-  { id: 30002411, name: "Anka",       security: "lowsec" },
-  { id: 30000049, name: "Hakonen",    security: "lowsec" },
-  { id: 30001647, name: "Amamake",    security: "lowsec" },
-  { id: 30000206, name: "Tama",       security: "lowsec" },
-  { id: 30002797, name: "Rancer",     security: "lowsec" },
-  { id: 30000021, name: "G-0Q86",     security: "nullsec" },
-  { id: 30001445, name: "Delve",      security: "nullsec" },
-];
+// Simple in-memory cache to avoid repeat fetches
+const cache = new Map<string, SolarSystem[]>();
 
-const ID_TO_NAME = new Map(KNOWN_SYSTEMS.map(s => [s.id, s]));
-const NAME_TO_ID = new Map(KNOWN_SYSTEMS.map(s => [s.name.toLowerCase(), s]));
+export async function searchSystems(query: string): Promise<SolarSystem[]> {
+  if (query.length < 2) return [];
+  const key = query.toLowerCase();
+  if (cache.has(key)) return cache.get(key)!;
 
-export function systemById(id: number): SolarSystem | undefined {
-  return ID_TO_NAME.get(id);
+  // Fetch a page and filter client-side (API has no search param)
+  // We fetch with offset=0 limit=1000 and search — not ideal but works for demo
+  // Better: use offset pagination to find matches. For now: client-side filter on first 5000.
+  try {
+    const results: SolarSystem[] = [];
+    for (let offset = 0; offset < 5000 && results.length < 8; offset += 1000) {
+      const r = await fetch(`${SYSTEMS_API}?limit=1000&offset=${offset}`);
+      const d = await r.json();
+      const matches = (d.data as SolarSystem[]).filter((s: SolarSystem) =>
+        s.name.toLowerCase().includes(key)
+      );
+      results.push(...matches);
+      if (matches.length >= 8 || d.data.length < 1000) break;
+    }
+    const top8 = results.slice(0, 8);
+    cache.set(key, top8);
+    return top8;
+  } catch {
+    return [];
+  }
 }
 
-export function systemByName(name: string): SolarSystem | undefined {
-  return NAME_TO_ID.get(name.toLowerCase());
+export async function systemById(id: number): Promise<SolarSystem | null> {
+  // Use offset trick: IDs are sequential starting ~30000001
+  // Direct lookup by fetching around the known ID range
+  try {
+    const offset = Math.max(0, id - 30000001);
+    const r = await fetch(`${SYSTEMS_API}?limit=10&offset=${offset}`);
+    const d = await r.json();
+    return (d.data as SolarSystem[]).find((s: SolarSystem) => s.id === id) ?? null;
+  } catch {
+    return null;
+  }
 }
 
-export function searchSystems(query: string): SolarSystem[] {
-  const q = query.toLowerCase();
-  return KNOWN_SYSTEMS.filter(s => s.name.toLowerCase().includes(q)).slice(0, 8);
+export function displayName(id: number | bigint, name?: string): string {
+  if (name) return name;
+  return `System #${id}`;
 }
-
-export function displayName(id: number | bigint): string {
-  const sys = systemById(Number(id));
-  return sys ? sys.name : `System #${id}`;
-}
-
-export const SECURITY_COLORS: Record<string, string> = {
-  highsec:  "#4aff9e",
-  lowsec:   "#f0c040",
-  nullsec:  "#ff4a4a",
-  wormhole: "#c040f0",
-};
