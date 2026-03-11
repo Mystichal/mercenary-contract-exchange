@@ -69,7 +69,7 @@ function ContractCard({ ev, onAccept }: {
       {/* Accept button */}
       {account && p?.issuer !== account.address && (
         <button
-          onClick={() => onAccept(ev.id.txDigest, "0x2::sui::SUI")}
+          onClick={() => onAccept(p?.contract_id as string, "0x2::sui::SUI")}
           style={{
             background: "rgba(74,158,255,0.12)",
             border: "1px solid rgba(74,158,255,0.3)",
