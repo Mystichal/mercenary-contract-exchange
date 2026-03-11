@@ -4,7 +4,7 @@ edition = "2024"
 
 [dependencies]
 # Let WorldContracts pull in the correct Sui framework version to avoid conflict
-WorldContracts = { git = "https://github.com/evefrontier/world-contracts.git", subdir = "contracts/world", rev = "main" }
+world = { git = "https://github.com/evefrontier/world-contracts.git", subdir = "contracts/world", rev = "main" }
 
 [addresses]
 mercenary_exchange = "0x0"
