@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mercenary Contract Exchange — EVE Frontier Hackathon 2026</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #050a12;
+    color: #e0eaf8;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .slide {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    padding: 80px 120px;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    top: 0; left: 0;
+  }
+  .slide.active { display: flex; }
+
+  /* Subtle star background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 70%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 15%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 85%, rgba(255,255,255,0.2) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .tag {
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #4a9eff;
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+
+  h1 {
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 44px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 32px;
+  }
+
+  .subtitle {
+    font-size: 22px;
+    color: #8aafd4;
+    max-width: 700px;
+    line-height: 1.6;
+  }
+
+  .accent { color: #4a9eff; }
+  .gold { color: #f0c040; }
+
+  .divider {
+    width: 60px;
+    height: 3px;
+    background: #4a9eff;
+    margin: 32px 0;
+  }
+
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .flow-step {
+    background: rgba(74, 158, 255, 0.1);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    border-radius: 8px;
+    padding: 20px 28px;
+    text-align: center;
+    min-width: 160px;
+  }
+
+  .flow-step .icon { font-size: 28px; margin-bottom: 8px; }
+  .flow-step .label { font-size: 14px; color: #8aafd4; margin-bottom: 4px; }
+  .flow-step .name { font-size: 16px; font-weight: 600; color: #fff; }
+
+  .arrow {
+    color: #4a9eff;
+    font-size: 24px;
+    padding: 0 12px;
+  }
+
+  .card-row {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+  }
+
+  .card {
+    flex: 1;
+    background: rgba(74, 158, 255, 0.07);
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    border-radius: 12px;
+    padding: 28px;
+  }
+
+  .card-icon { font-size: 32px; margin-bottom: 12px; }
+  .card-title { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+  .card-desc { font-size: 14px; color: #8aafd4; line-height: 1.6; }
+
+  .tech-stack {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .tech-pill {
+    background: rgba(74, 158, 255, 0.12);
+    border: 1px solid rgba(74, 158, 255, 0.25);
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-size: 15px;
+    color: #4a9eff;
+    font-weight: 500;
+  }
+
+  .big-quote {
+    font-size: 32px;
+    font-weight: 300;
+    line-height: 1.5;
+    color: #c8dff5;
+    max-width: 900px;
+    font-style: italic;
+  }
+
+  .big-quote strong {
+    color: #fff;
+    font-weight: 600;
+    font-style: normal;
+  }
+
+  /* Progress dots */
+  .progress {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(74, 158, 255, 0.3);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .dot.active { background: #4a9eff; }
+
+  /* Nav hint */
+  .nav-hint {
+    position: fixed;
+    bottom: 40px;
+    right: 60px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 1px;
+  }
+
+  /* Slide number */
+  .slide-num {
+    position: fixed;
+    top: 40px;
+    right: 60px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.15);
+    letter-spacing: 2px;
+  }
+
+  /* Logo / branding top left */
+  .brand {
+    position: fixed;
+    top: 40px;
+    left: 60px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: rgba(74, 158, 255, 0.5);
+    text-transform: uppercase;
+  }
+
+  ul.feature-list {
+    list-style: none;
+    margin-top: 16px;
+  }
+  ul.feature-list li {
+    padding: 12px 0;
+    font-size: 20px;
+    color: #c8dff5;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  ul.feature-list li .check { color: #4a9eff; font-size: 18px; }
+</style>
+</head>
+<body>
+
+<div class="brand">EVE Frontier Hackathon 2026</div>
+<div class="slide-num" id="slideNum">01 / 06</div>
+
+<!-- Slide 1: Title -->
+<div class="slide active" id="s1">
+  <div class="tag">Eve Frontier Hackathon 2026 &nbsp;·&nbsp; A Toolkit for Civilization</div>
+  <h1>Mercenary<br>Contract Exchange</h1>
+  <div class="divider"></div>
+  <p class="subtitle">A programmable war economy for the frontier.<br>Missions as financial instruments. Settlement by world state.</p>
+</div>
+
+<!-- Slide 2: The Problem -->
+<div class="slide" id="s2">
+  <div class="tag">The Problem</div>
+  <h2>Trust is scarce.<br><span class="accent">The frontier doesn't have time for it.</span></h2>
+  <div class="divider"></div>
+  <div class="card-row">
+    <div class="card">
+      <div class="card-icon">⚠️</div>
+      <div class="card-title">No enforcement</div>
+      <div class="card-desc">Mercenaries take payment and vanish. Tribes issue missions with no guarantee of execution.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📉</div>
+      <div class="card-title">Underpriced risk</div>
+      <div class="card-desc">No market exists to price the difficulty of missions — territory, threat level, logistics.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <div class="card-title">Locked capital</div>
+      <div class="card-desc">No secondary market means no liquidity. Accepted contracts can't be reassigned or traded.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: The Solution -->
+<div class="slide" id="s3">
+  <div class="tag">The Solution</div>
+  <h2>Contracts as <span class="gold">financial instruments</span></h2>
+  <div class="divider"></div>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="icon">🏛️</div>
+      <div class="label">Tribe</div>
+      <div class="name">Issues Contract</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="flow-step">
+      <div class="icon">🔐</div>
+      <div class="label">Escrow</div>
+      <div class="name">Locks Reward</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="flow-step">
+      <div class="icon">⚔️</div>
+      <div class="label">Mercenary</div>
+      <div class="name">Executes Mission</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="flow-step">
+      <div class="icon">🌐</div>
+      <div class="label">World State</div>
+      <div class="name">Verifies Outcome</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="flow-step">
+      <div class="icon">✅</div>
+      <div class="label">Settlement</div>
+      <div class="name">Auto Pays Out</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4: Features -->
+<div class="slide" id="s4">
+  <div class="tag">What we built</div>
+  <h2>Core Infrastructure</h2>
+  <div class="divider"></div>
+  <ul class="feature-list">
+    <li><span class="check">◆</span> <strong>Pre-funded escrow</strong> — reward locked on-chain before mission starts</li>
+    <li><span class="check">◆</span> <strong>Transferable obligations</strong> — execution rights can be bought, sold, reassigned</li>
+    <li><span class="check">◆</span> <strong>World-state verification</strong> — killmails, status events, cargo deposits as proof</li>
+    <li><span class="check">◆</span> <strong>Automatic settlement</strong> — no arbitrators, no trust required</li>
+    <li><span class="check">◆</span> <strong>Contract registry</strong> — on-chain index for UI discovery without an indexer</li>
+  </ul>
+</div>
+
+<!-- Slide 5: Tech -->
+<div class="slide" id="s5">
+  <div class="tag">Technical</div>
+  <h2>Built on <span class="accent">Sui</span> &amp; EVE Frontier<br>World Contracts</h2>
+  <div class="divider"></div>
+  <div class="tech-stack">
+    <div class="tech-pill">Sui Move</div>
+    <div class="tech-pill">world-contracts events</div>
+    <div class="tech-pill">suix_queryEvents</div>
+    <div class="tech-pill">TypeScript SDK</div>
+    <div class="tech-pill">Shared Object Escrow</div>
+    <div class="tech-pill">VerifierCap pattern</div>
+  </div>
+  <p class="subtitle" style="margin-top: 36px;">
+    Smart contracts handle escrow, settlement, and registry.<br>
+    The EVE Frontier world emits the events that verify missions automatically.
+  </p>
+</div>
+
+<!-- Slide 6: Pitch -->
+<div class="slide" id="s6">
+  <div class="tag">The Vision</div>
+  <p class="big-quote">
+    Civilization on the frontier<br>is defined by <strong>risk</strong>.<br><br>
+    We built the primitive<br>that <strong>prices it</strong>.
+  </p>
+  <div class="divider"></div>
+  <p class="subtitle">
+    <span class="accent">github.com/Mystichal/mercenary-contract-exchange</span>
+  </p>
+</div>
+
+<!-- Progress dots -->
+<div class="progress" id="progress"></div>
+<div class="nav-hint">← → or click to navigate</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const progress = document.getElementById('progress');
+  const slideNum = document.getElementById('slideNum');
+  let current = 0;
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    progress.appendChild(dot);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    document.querySelectorAll('.dot')[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    document.querySelectorAll('.dot')[current].classList.add('active');
+    slideNum.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') goTo(current + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+  });
+
+  // Click anywhere to advance
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.dot') && !e.target.closest('.progress')) goTo(current + 1);
+  });
+</script>
+</body>
+</html>
