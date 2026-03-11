@@ -21,8 +21,8 @@ export const CONFIG = {
     verifierCapId: "0x0", // fill after deploy
     adminCapId:   "0x0",  // fill after deploy
 
-    // EVE Frontier world-contracts package (verify correct address on March 11)
-    worldContractsPackage: "0x0",
+    // EVE Frontier world-contracts — testnet_utopia deployment
+    worldContractsPackage: "0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75",
 
     // Poll interval for world event monitoring
     pollIntervalMs: 8_000,
