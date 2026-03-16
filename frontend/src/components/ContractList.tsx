@@ -209,9 +209,11 @@ export default function ContractList({ onCreateClick }: Props) {
   );
 
   return (
-    <div style={{ display: "grid", gap: 2 }}>
-      {contracts.map(ev => (
-        <ContractCard key={ev.id.txDigest} ev={ev} onAccept={acceptContract} />
+    <div style={{ border: "1px solid var(--border)" }}>
+      {contracts.map((ev, i) => (
+        <div key={ev.id.txDigest} style={{ borderTop: i === 0 ? "none" : "1px solid var(--border)" }}>
+          <ContractCard ev={ev} onAccept={acceptContract} />
+        </div>
       ))}
     </div>
   );

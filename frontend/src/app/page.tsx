@@ -36,31 +36,32 @@ export default function Home() {
       {/* Hero */}
       <div style={{
         borderBottom: "1px solid var(--border)",
-        padding: "40px 32px 32px",
-        background: `linear-gradient(180deg, rgba(255,71,0,0.04) 0%, transparent 100%)`,
+        padding: "28px 32px 20px",
+        background: `linear-gradient(180deg, rgba(255,71,0,0.03) 0%, transparent 100%)`,
       }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <p style={{
-            fontSize: 11, letterSpacing: "0.2em", color: "var(--accent)",
-            textTransform: "uppercase", marginBottom: 10,
-          }}>
-            EVE FRONTIER — TESTNET
-          </p>
-          <h1 style={{
-            fontSize: 28, fontWeight: 700, letterSpacing: "0.06em",
-            textTransform: "uppercase", color: "var(--text)", marginBottom: 12,
-          }}>
-            MERCENARY CONTRACT EXCHANGE
-          </h1>
-          <p style={{ color: "var(--text-dim)", maxWidth: 560, fontSize: 13, lineHeight: 1.7 }}>
-            Issue operational missions as on-chain instruments.
-            Mercenaries execute. World-state events settle automatically.
-          </p>
+        <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24 }}>
+          <div>
+            <p style={{
+              fontSize: 10, letterSpacing: "0.25em", color: "var(--accent)",
+              textTransform: "uppercase", marginBottom: 6,
+            }}>
+              EVE FRONTIER — TESTNET
+            </p>
+            <h1 style={{
+              fontSize: 22, fontWeight: 700, letterSpacing: "0.08em",
+              textTransform: "uppercase", color: "var(--text)", marginBottom: 6,
+            }}>
+              MERCENARY CONTRACT EXCHANGE
+            </h1>
+            <p style={{ color: "var(--text-dim)", fontSize: 12, lineHeight: 1.6 }}>
+              Issue missions as on-chain instruments. World-state events settle automatically.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Main */}
-      <main style={{ maxWidth: 900, margin: "0 auto", padding: "32px 32px 80px" }}>
+      <main style={{ maxWidth: 900, margin: "0 auto", padding: "24px 32px 80px" }}>
 
         {/* Actions bar */}
         <div style={{

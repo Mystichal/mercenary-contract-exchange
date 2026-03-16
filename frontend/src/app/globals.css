@@ -29,6 +29,34 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* dapp-kit ConnectButton override */
+[data-dapp-kit] button,
+button[data-connect-button],
+.dapp-kit-connect-button,
+div[class*="ConnectButton"] button,
+div[class*="connect"] button {
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-bright) !important;
+  border-radius: 2px !important;
+  padding: 8px 16px !important;
+}
+div[class*="ConnectButton"] button:hover,
+div[class*="connect"] button:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+/* Wallet dropdown */
+div[class*="dropdown"], div[class*="Dropdown"], div[class*="menu"], div[class*="Menu"] {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border-bright) !important;
+  border-radius: 2px !important;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
