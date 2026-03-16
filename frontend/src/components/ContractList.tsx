@@ -116,8 +116,8 @@ function ContractRow({ ev, onAccept, isOdd }: {
             onClick={() => onAccept(contractId)}
             style={{
               background: "var(--btn-fill)",
-              border: "1px solid var(--btn-border)",
-              color: "var(--text-bright)",
+              border: "none",
+              color: "#fff",
               padding: "6px 14px",
               fontSize: 10,
               letterSpacing: "0.1em",
@@ -199,8 +199,8 @@ export default function ContractList({ onCreateClick }: Props) {
       </div>
       {account && (
         <button onClick={onCreateClick} style={{
-          background: "var(--btn-fill)", border: "1px solid var(--btn-border)",
-          color: "var(--text-bright)", padding: "9px 22px",
+          background: "var(--btn-fill)", border: "none",
+          color: "#fff", padding: "9px 22px",
           fontSize: 11, letterSpacing: "0.1em",
         }}>
           + ISSUE CONTRACT

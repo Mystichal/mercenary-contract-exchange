@@ -57,8 +57,8 @@ export default function Home() {
               onClick={() => setShowCreate(true)}
               style={{
                 background: "var(--btn-fill)",
-                border: "1px solid var(--btn-border)",
-                color: "var(--text-bright)",
+                border: "none",
+                color: "#fff",
                 padding: "9px 22px",
                 fontSize: 11,
                 fontWeight: 700,

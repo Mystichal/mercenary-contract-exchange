@@ -101,9 +101,10 @@ export default function CreateContractModal({ onClose }: Props) {
             {Object.entries(MISSION_TYPES).map(([k, v]) => (
               <button key={k} onClick={() => setMissionType(Number(k))} style={{
                 padding: "8px 10px", textAlign: "left",
-                background: missionType === Number(k) ? "var(--btn-fill)" : "var(--surface-input)",
-                border: missionType === Number(k) ? "1px solid var(--btn-border)" : "1px solid var(--border-bright)",
-                color: missionType === Number(k) ? "var(--text-bright)" : "var(--text-dim)",
+                background: missionType === Number(k) ? "var(--btn-fill)" : "var(--btn-secondary)",
+                border: "none",
+                color: "var(--text-bright)",
+                opacity: missionType === Number(k) ? 1 : 0.55,
                 fontSize: 10, letterSpacing: "0.08em",
               }}>
                 {v.label.toUpperCase()}
@@ -161,8 +162,8 @@ export default function CreateContractModal({ onClose }: Props) {
 
           <button onClick={handleSubmit} disabled={isPending} style={{
             width: "100%",
-            background: isPending ? "var(--olive)" : "var(--btn-fill)",
-            border: `1px solid ${isPending ? "var(--olive)" : "var(--btn-border)"}`,
+            background: isPending ? "var(--btn-disabled)" : "var(--btn-fill)",
+            border: "none",
             color: "var(--text-bright)",
             padding: "11px", fontSize: 11, fontWeight: 700, letterSpacing: "0.14em",
             opacity: isPending ? 0.7 : 1,

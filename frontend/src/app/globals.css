@@ -13,11 +13,14 @@
   --text-dim:       #7a756e;      /* labels, metadata */
   --text-muted:     #4a4642;      /* placeholders, very dim */
 
-  --accent:         #FF4700;      /* highlight only — system names, active state */
-  --accent-dim:     rgba(255, 71, 0, 0.1);
-  --btn-fill:       #5a1f0e;      /* button background — dark burnt orange */
-  --btn-fill-hover: #7a2c14;      /* button hover */
-  --btn-border:     #8b3520;      /* button border */
+  --accent:         #FF4700;      /* primary — CCP design system exact */
+  --accent-dim:     rgba(255, 71, 0, 0.12);
+  --btn-fill:       #FF4700;      /* primary button — full orange */
+  --btn-fill-hover: #e03f00;      /* primary hover — slightly darker */
+  --btn-disabled:   #6b2e18;      /* disabled state */
+  --btn-secondary:  #6B6B5E;      /* secondary button */
+  --btn-secondary-h:#7a7a6d;      /* secondary hover */
+  --btn-border:     transparent;
 
   --border:         rgba(255, 255, 255, 0.06);   /* subtle panel border */
   --border-bright:  rgba(255, 255, 255, 0.12);   /* column/row dividers */
