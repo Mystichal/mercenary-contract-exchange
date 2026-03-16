@@ -64,8 +64,11 @@ async function fetchActiveContracts(): Promise<ActiveContract[]> {
   const contracts: ActiveContract[] = [];
   for (const ev of events.data) {
     const p = ev.parsedJson as Record<string, unknown>;
-    const contractId = p.contract_id as string;
-    if (!contractId) continue;
+    // contract_id comes from Move ID type — may be hex string or nested object
+    const rawId = p.contract_id;
+    const contractId = typeof rawId === "string" ? rawId
+      : (rawId as Record<string, string>)?.id ?? "";
+    if (!contractId) { console.log("[verifier] No contract_id in event:", p); continue; }
 
     // Fetch the live object to get current status + executor
     try {
@@ -73,8 +76,8 @@ async function fetchActiveContracts(): Promise<ActiveContract[]> {
       const fields = (obj.data?.content as { fields?: Record<string, unknown> })?.fields ?? {};
       const status = Number(fields.status ?? 0);
 
-      // Only care about ACTIVE contracts (status=1)
-      if (status !== 1) continue;
+      // Watch OPEN (0) and ACTIVE (1) — skip settled/failed
+      if (status > 1) continue;
 
       contracts.push({
         contractId,
@@ -219,8 +222,8 @@ async function main() {
     try {
       await poll(cursors, contracts, keypair);
 
-      // Refresh active contract list periodically
-      if (Date.now() - lastRefresh > 60_000) {
+      // Refresh contract list every 15s to catch newly accepted contracts
+      if (Date.now() - lastRefresh > 15_000) {
         contracts = await fetchActiveContracts();
         lastRefresh = Date.now();
       }
