@@ -1,21 +1,33 @@
-/* EVE Frontier / CCP Design System */
+/* EVE Frontier — In-Game UI Style */
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 :root {
-  --bg:           #0B0B0B;
-  --surface:      #111111;
-  --surface-2:    #181818;
-  --surface-hover:#1f1f1f;
-  --text:         #FAFAE5;
-  --text-dim:     rgba(250, 250, 229, 0.55);
-  --text-muted:   rgba(250, 250, 229, 0.3);
-  --accent:       #FF4700;
-  --accent-dim:   rgba(255, 71, 0, 0.12);
-  --accent-border:rgba(255, 71, 0, 0.35);
-  --olive:        #6B6B5E;
-  --olive-dim:    rgba(107, 107, 94, 0.2);
-  --border:       rgba(250, 250, 229, 0.08);
-  --border-bright:rgba(250, 250, 229, 0.18);
+  --bg:             #0a0908;      /* near-black, very slight warm tint */
+  --panel:          #161412;      /* panel background — visible against bg */
+  --panel-header:   #1e1b18;      /* panel header row — slightly lighter */
+  --panel-hover:    #1c1916;      /* hover state */
+  --surface-input:  #111010;      /* form inputs */
+
+  --text:           #d4cfc8;      /* warm off-white, not pure white */
+  --text-bright:    #ede8e0;      /* titles, values */
+  --text-dim:       #7a756e;      /* labels, metadata */
+  --text-muted:     #4a4642;      /* placeholders, very dim */
+
+  --accent:         #FF4700;      /* highlight only — system names, active state */
+  --accent-dim:     rgba(255, 71, 0, 0.1);
+  --btn-fill:       #5a1f0e;      /* button background — dark burnt orange */
+  --btn-fill-hover: #7a2c14;      /* button hover */
+  --btn-border:     #8b3520;      /* button border */
+
+  --border:         rgba(255, 255, 255, 0.06);   /* subtle panel border */
+  --border-bright:  rgba(255, 255, 255, 0.12);   /* column/row dividers */
+  --border-accent:  rgba(255, 71, 0, 0.4);       /* selected/active border */
+
+  --olive:          #4a4840;
+  --status-open:    #FF4700;
+  --status-active:  #7acc7a;
+  --status-done:    #6a6560;
+  --status-failed:  #cc4444;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,70 +36,35 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Share Tech Mono', 'Courier New', monospace;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* dapp-kit ConnectButton override */
-[data-dapp-kit] button,
-button[data-connect-button],
-.dapp-kit-connect-button,
-div[class*="ConnectButton"] button,
-div[class*="connect"] button {
-  font-family: 'Share Tech Mono', monospace !important;
-  font-size: 11px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
-  background: var(--surface) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--border-bright) !important;
-  border-radius: 2px !important;
-  padding: 8px 16px !important;
-}
-div[class*="ConnectButton"] button:hover,
-div[class*="connect"] button:hover {
-  border-color: var(--accent) !important;
-  color: var(--accent) !important;
-}
-/* Wallet dropdown */
-div[class*="dropdown"], div[class*="Dropdown"], div[class*="menu"], div[class*="Menu"] {
-  background: var(--surface-2) !important;
-  border: 1px solid var(--border-bright) !important;
-  border-radius: 2px !important;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar       { width: 3px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--olive); }
 
-/* Focus ring */
 *:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
-/* Buttons */
 button {
   font-family: inherit;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 12px;
-  border-radius: 2px;
-  transition: background 0.1s, border-color 0.1s;
+  font-size: 11px;
+  border-radius: 0;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
 }
 
-/* Inputs */
 input, select, textarea {
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 2px;
+  background: var(--surface-input);
+  border: 1px solid var(--border-bright);
+  border-radius: 0;
   transition: border-color 0.15s;
 }
-input:focus, select:focus, textarea:focus {
-  border-color: var(--accent);
-  outline: none;
-}
-input::placeholder { color: var(--text-muted); }
+input:focus, select:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }

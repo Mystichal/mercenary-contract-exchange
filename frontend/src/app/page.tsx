@@ -13,85 +13,68 @@ export default function Home() {
 
       {/* Top nav */}
       <header style={{
-        borderBottom: "1px solid var(--border)",
+        borderBottom: "1px solid var(--border-bright)",
         padding: "0 32px",
-        height: 56,
+        height: 48,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        background: "var(--surface)",
+        background: "var(--panel-header)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <span style={{ color: "var(--accent)", fontSize: 18, fontWeight: 700, letterSpacing: "0.12em" }}>
-            ◆ MCE
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <span style={{ color: "var(--accent)", fontSize: 13, fontWeight: 700, letterSpacing: "0.15em" }}>
+            MCE
           </span>
-          <span style={{ color: "var(--border-bright)", fontSize: 12 }}>|</span>
-          <span style={{ color: "var(--text-dim)", fontSize: 11, letterSpacing: "0.1em" }}>
+          <span style={{ color: "var(--border-bright)", fontSize: 10 }}>◆</span>
+          <span style={{ color: "var(--text-dim)", fontSize: 10, letterSpacing: "0.14em" }}>
             MERCENARY CONTRACT EXCHANGE
+          </span>
+          <span style={{ color: "var(--border-bright)", fontSize: 10 }}>◆</span>
+          <span style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: "0.1em" }}>
+            TESTNET
           </span>
         </div>
         <ConnectButton />
       </header>
 
-      {/* Hero */}
+      {/* Page header */}
       <div style={{
-        borderBottom: "1px solid var(--border)",
-        padding: "28px 32px 20px",
-        background: `linear-gradient(180deg, rgba(255,71,0,0.03) 0%, transparent 100%)`,
+        borderBottom: "1px solid var(--border-bright)",
+        padding: "20px 32px",
+        background: "var(--panel)",
       }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24 }}>
+        <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <p style={{
-              fontSize: 10, letterSpacing: "0.25em", color: "var(--accent)",
-              textTransform: "uppercase", marginBottom: 6,
-            }}>
-              EVE FRONTIER — TESTNET
-            </p>
-            <h1 style={{
-              fontSize: 22, fontWeight: 700, letterSpacing: "0.08em",
-              textTransform: "uppercase", color: "var(--text)", marginBottom: 6,
-            }}>
-              MERCENARY CONTRACT EXCHANGE
-            </h1>
-            <p style={{ color: "var(--text-dim)", fontSize: 12, lineHeight: 1.6 }}>
-              Issue missions as on-chain instruments. World-state events settle automatically.
-            </p>
+            <div style={{ fontSize: 10, color: "var(--accent)", letterSpacing: "0.2em", marginBottom: 4 }}>
+              CONTRACT BOARD
+            </div>
+            <div style={{ fontSize: 18, color: "var(--text-bright)", fontWeight: 700, letterSpacing: "0.08em" }}>
+              OPEN CONTRACTS
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Main */}
-      <main style={{ maxWidth: 900, margin: "0 auto", padding: "24px 32px 80px" }}>
-
-        {/* Actions bar */}
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          marginBottom: 24,
-        }}>
-          <span style={{
-            fontSize: 11, letterSpacing: "0.15em", color: "var(--text-dim)",
-            textTransform: "uppercase",
-          }}>
-            ACTIVE CONTRACTS
-          </span>
           {account && (
             <button
               onClick={() => setShowCreate(true)}
               style={{
-                background: "var(--accent)",
-                color: "#fff",
-                border: "none",
-                padding: "9px 20px",
-                fontSize: 12,
+                background: "var(--btn-fill)",
+                border: "1px solid var(--btn-border)",
+                color: "var(--text-bright)",
+                padding: "9px 22px",
+                fontSize: 11,
                 fontWeight: 700,
-                letterSpacing: "0.1em",
+                letterSpacing: "0.12em",
               }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--btn-fill-hover)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "var(--btn-fill)")}
             >
               + ISSUE CONTRACT
             </button>
           )}
         </div>
+      </div>
 
+      {/* Contract list */}
+      <main style={{ maxWidth: 960, margin: "0 auto", padding: "24px 32px 80px" }}>
         <ContractList onCreateClick={() => setShowCreate(true)} />
       </main>
 

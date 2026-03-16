@@ -16,7 +16,6 @@ export default function SystemInput({ value, onChange }: Props) {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (value.length < 2) { setResults([]); setOpen(false); return; }
-
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       const matches = await searchSystems(value);
@@ -33,17 +32,13 @@ export default function SystemInput({ value, onChange }: Props) {
   }
 
   return (
-    <div style={{ position: "relative", marginBottom: 18 }}>
+    <div style={{ position: "relative", marginBottom: 16 }}>
       <div style={{ position: "relative" }}>
         <input
           style={{
-            width: "100%",
-            padding: "10px 36px 10px 12px",
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            color: "var(--text)",
-            fontSize: 13,
-            borderRadius: 2,
+            width: "100%", padding: "9px 32px 9px 11px",
+            background: "var(--surface-input)", border: "1px solid var(--border-bright)",
+            color: "var(--text-bright)", fontSize: 12, borderRadius: 0,
           }}
           placeholder="TYPE SYSTEM NAME..."
           value={value}
@@ -52,37 +47,35 @@ export default function SystemInput({ value, onChange }: Props) {
         />
         {loading && (
           <span style={{
-            position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-            color: "var(--accent)", fontSize: 10, letterSpacing: "0.1em",
-          }}>
-            ...
-          </span>
+            position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+            color: "var(--accent)", fontSize: 10,
+          }}>···</span>
         )}
       </div>
 
       {open && (
         <div style={{
           position: "absolute", top: "100%", left: 0, right: 0, zIndex: 200,
-          background: "var(--surface-2)",
+          background: "var(--panel-header)",
           border: "1px solid var(--border-bright)",
           borderTop: "1px solid var(--accent)",
-          maxHeight: 240, overflowY: "auto",
+          maxHeight: 220, overflowY: "auto",
         }}>
           {results.map(sys => (
             <div key={sys.id}
               onMouseDown={() => pick(sys)}
               style={{
-                padding: "9px 12px", cursor: "pointer",
+                padding: "8px 12px", cursor: "pointer",
                 display: "flex", alignItems: "center", gap: 12,
                 borderBottom: "1px solid var(--border)",
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = "var(--accent-dim)")}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--panel-hover)")}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
-              <span style={{ color: "var(--text)", fontSize: 13, flex: 1, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <span style={{ color: "var(--text-bright)", fontSize: 12, flex: 1, letterSpacing: "0.05em" }}>
                 {sys.name}
               </span>
-              <span style={{ color: "var(--text-muted)", fontSize: 11 }}>#{sys.id}</span>
+              <span style={{ color: "var(--text-muted)", fontSize: 10 }}>#{sys.id}</span>
             </div>
           ))}
         </div>
