@@ -73,11 +73,8 @@ export default function Home() {
                 OPEN CONTRACTS
               </h1>
               {account && (
-                <button
-                  className="btn-primary"
-                  onClick={() => setShowCreate(true)}
-                  style={{ fontSize: 11, letterSpacing: "0.12em", fontWeight: 700, padding: "9px 22px" }}
-                >
+                <button className="btn-primary" onClick={() => setShowCreate(true)}
+                  style={{ padding: "9px 22px", fontSize: 11 }}>
                   + ISSUE CONTRACT
                 </button>
               )}

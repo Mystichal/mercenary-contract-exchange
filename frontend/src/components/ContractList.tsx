@@ -112,19 +112,8 @@ function ContractRow({ ev, onAccept, isOdd }: {
       {/* Action */}
       <div style={{ textAlign: "right" }}>
         {account && isOpen ? (
-          <button
-            onClick={() => onAccept(contractId)}
-            style={{
-              background: "var(--btn-fill)",
-              border: "none",
-              color: "#fff",
-              padding: "6px 14px",
-              fontSize: 10,
-              letterSpacing: "0.1em",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.background = "var(--btn-fill-hover)")}
-            onMouseLeave={e => (e.currentTarget.style.background = "var(--btn-fill)")}
-          >
+          <button className="btn-primary" onClick={() => onAccept(contractId)}
+            style={{ padding: "6px 16px", fontSize: 10 }}>
             ACCEPT
           </button>
         ) : null}
@@ -198,11 +187,8 @@ export default function ContractList({ onCreateClick }: Props) {
         NO CONTRACTS ON BOARD
       </div>
       {account && (
-        <button onClick={onCreateClick} style={{
-          background: "var(--btn-fill)", border: "none",
-          color: "#fff", padding: "9px 22px",
-          fontSize: 11, letterSpacing: "0.1em",
-        }}>
+        <button className="btn-primary" onClick={onCreateClick}
+          style={{ padding: "9px 22px", fontSize: 11 }}>
           + ISSUE CONTRACT
         </button>
       )}
