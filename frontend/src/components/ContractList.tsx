@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSuiClientQuery, useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import { useSuiClientQuery, useSuiClient, useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { PACKAGE_ID, REGISTRY_ID, CLOCK_ID, MISSION_TYPES } from "@/lib/config";
 import { SYSTEMS_API } from "@/lib/systems";
@@ -22,6 +22,32 @@ function useSystemName(id: number | undefined): string {
   return name || (id ? `#${id}` : "Unknown");
 }
 
+const STATUS_COLORS: Record<number, string> = {
+  0: "#4a9eff", // OPEN
+  1: "#4aff9e", // ACTIVE
+  2: "#f0c040", // COMPLETED
+  3: "#ff4a4a", // FAILED
+  4: "#c040f0", // DISPUTED
+};
+const STATUS_TEXT: Record<number, string> = {
+  0: "OPEN", 1: "ACTIVE", 2: "COMPLETED", 3: "FAILED", 4: "DISPUTED",
+};
+
+function useLiveStatus(contractId: string | undefined): number | null {
+  const [status, setStatus] = useState<number | null>(null);
+  const client = useSuiClient();
+  useEffect(() => {
+    if (!contractId) return;
+    client.getObject({ id: contractId, options: { showContent: true } })
+      .then(obj => {
+        const fields = (obj.data?.content as { fields?: Record<string, unknown> })?.fields ?? {};
+        setStatus(Number(fields.status ?? 0));
+      })
+      .catch(() => setStatus(null));
+  }, [contractId, client]);
+  return status;
+}
+
 // ── Single contract card (hooks at top level) ──────────────────────────────────
 function ContractCard({ ev, onAccept }: {
   ev: { id: { txDigest: string }; parsedJson: unknown };
@@ -29,9 +55,12 @@ function ContractCard({ ev, onAccept }: {
 }) {
   const account = useCurrentAccount();
   const p = ev.parsedJson as Record<string, unknown>;
+  const rawId = p?.contract_id;
+  const contractId = typeof rawId === "string" ? rawId : (rawId as Record<string, string>)?.id ?? "";
   const mType = MISSION_TYPES[(p?.mission_type as number)] ?? MISSION_TYPES[2];
   const reward = p?.reward_amount ? (Number(p.reward_amount) / 1e9).toFixed(2) : "?";
   const systemName = useSystemName(p?.solar_system_id ? Number(p.solar_system_id) : undefined);
+  const liveStatus = useLiveStatus(contractId);
 
   return (
     <div style={{
@@ -66,10 +95,23 @@ function ContractCard({ ev, onAccept }: {
         <div style={{ fontSize: 11, color: "#8aafd4" }}>reward</div>
       </div>
 
-      {/* Accept button */}
-      {account && (
+      {/* Status badge */}
+      {liveStatus !== null && (
+        <div style={{
+          fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 6,
+          background: `${STATUS_COLORS[liveStatus] ?? "#888"}22`,
+          color: STATUS_COLORS[liveStatus] ?? "#888",
+          border: `1px solid ${STATUS_COLORS[liveStatus] ?? "#888"}44`,
+          whiteSpace: "nowrap",
+        }}>
+          {STATUS_TEXT[liveStatus] ?? "UNKNOWN"}
+        </div>
+      )}
+
+      {/* Accept button — only for OPEN contracts */}
+      {account && liveStatus === 0 && (
         <button
-          onClick={() => onAccept(p?.contract_id as string, "0x2::sui::SUI")}
+          onClick={() => onAccept(contractId, "0x2::sui::SUI")}
           style={{
             background: "rgba(74,158,255,0.12)",
             border: "1px solid rgba(74,158,255,0.3)",
