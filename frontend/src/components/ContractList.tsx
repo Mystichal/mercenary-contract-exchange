@@ -19,20 +19,10 @@ function useSystemName(id: number | undefined): string {
       })
       .catch(() => {});
   }, [id]);
-  return name || (id ? `#${id}` : "Unknown");
+  return name || (id ? `#${id}` : "—");
 }
 
-const STATUS_COLORS: Record<number, string> = {
-  0: "#4a9eff", // OPEN
-  1: "#4aff9e", // ACTIVE
-  2: "#f0c040", // COMPLETED
-  3: "#ff4a4a", // FAILED
-  4: "#c040f0", // DISPUTED
-};
-const STATUS_TEXT: Record<number, string> = {
-  0: "OPEN", 1: "ACTIVE", 2: "COMPLETED", 3: "FAILED", 4: "DISPUTED",
-};
-
+// ── Live status hook ───────────────────────────────────────────────────────────
 function useLiveStatus(contractId: string | undefined): number | null {
   const [status, setStatus] = useState<number | null>(null);
   const client = useSuiClient();
@@ -48,85 +38,117 @@ function useLiveStatus(contractId: string | undefined): number | null {
   return status;
 }
 
-// ── Single contract card (hooks at top level) ──────────────────────────────────
+// ── Status display ─────────────────────────────────────────────────────────────
+const STATUS_LABEL: Record<number, string>  = { 0:"OPEN", 1:"ACTIVE", 2:"COMPLETED", 3:"FAILED", 4:"DISPUTED" };
+const STATUS_COLOR: Record<number, string>  = {
+  0: "var(--accent)",
+  1: "#4aff9e",
+  2: "var(--text-dim)",
+  3: "#ff4a4a",
+  4: "#c040f0",
+};
+
+// ── Contract card ──────────────────────────────────────────────────────────────
 function ContractCard({ ev, onAccept }: {
   ev: { id: { txDigest: string }; parsedJson: unknown };
   onAccept: (contractId: string, coinType: string) => void;
 }) {
-  const account = useCurrentAccount();
-  const p = ev.parsedJson as Record<string, unknown>;
-  const rawId = p?.contract_id;
+  const account  = useCurrentAccount();
+  const p        = ev.parsedJson as Record<string, unknown>;
+  const rawId    = p?.contract_id;
   const contractId = typeof rawId === "string" ? rawId : (rawId as Record<string, string>)?.id ?? "";
-  const mType = MISSION_TYPES[(p?.mission_type as number)] ?? MISSION_TYPES[2];
-  const reward = p?.reward_amount ? (Number(p.reward_amount) / 1e9).toFixed(2) : "?";
+  const mType    = MISSION_TYPES[(p?.mission_type as number)] ?? MISSION_TYPES[2];
+  const reward   = p?.reward_amount ? (Number(p.reward_amount) / 1e9).toFixed(2) : "?";
   const systemName = useSystemName(p?.solar_system_id ? Number(p.solar_system_id) : undefined);
   const liveStatus = useLiveStatus(contractId);
+  const statusLabel = liveStatus !== null ? (STATUS_LABEL[liveStatus] ?? "UNKNOWN") : "...";
+  const statusColor = liveStatus !== null ? (STATUS_COLOR[liveStatus] ?? "var(--text-dim)") : "var(--text-muted)";
+
+  const issuer = p?.issuer as string ?? "";
 
   return (
     <div style={{
-      background: "rgba(74,158,255,0.05)",
-      border: `1px solid rgba(74,158,255,0.15)`,
-      borderLeft: `3px solid ${mType.color}`,
-      borderRadius: 10, padding: "20px 24px",
-      display: "flex", alignItems: "center", gap: 24,
-    }}>
-      {/* Mission type badge */}
+      background: "var(--surface)",
+      border: "1px solid var(--border)",
+      borderLeft: `2px solid ${mType.color === "#4a9eff" ? "var(--accent)" : mType.color}`,
+      padding: "18px 20px",
+      display: "grid",
+      gridTemplateColumns: "auto 1fr auto auto auto",
+      alignItems: "center",
+      gap: 20,
+    }}
+    onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-hover)")}
+    onMouseLeave={e => (e.currentTarget.style.background = "var(--surface)")}
+    >
+      {/* Mission type */}
       <div style={{
-        background: `${mType.color}18`, border: `1px solid ${mType.color}44`,
-        borderRadius: 6, padding: "6px 12px", whiteSpace: "nowrap",
-        fontSize: 12, color: mType.color, fontWeight: 600,
+        fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
+        padding: "4px 8px",
+        background: "var(--olive-dim)",
+        border: "1px solid var(--border-bright)",
+        color: "var(--text-dim)",
+        whiteSpace: "nowrap",
       }}>
-        {mType.label}
+        {mType.label.toUpperCase()}
       </div>
 
-      {/* Details */}
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 2 }}>
+      {/* System + issuer */}
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: "0.05em", color: "var(--text)", textTransform: "uppercase" }}>
           {systemName}
         </div>
-        <div style={{ fontSize: 12, color: "#8aafd4", fontFamily: "monospace" }}>
-          {(p?.issuer as string)?.slice(0, 8)}...{(p?.issuer as string)?.slice(-6)}
+        <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "monospace", marginTop: 2 }}>
+          {issuer.slice(0, 6)}...{issuer.slice(-4)}
         </div>
       </div>
 
       {/* Reward */}
       <div style={{ textAlign: "right" }}>
-        <div style={{ fontSize: 20, fontWeight: 700, color: "#f0c040" }}>{reward} SUI</div>
-        <div style={{ fontSize: 11, color: "#8aafd4" }}>reward</div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)", letterSpacing: "0.04em" }}>
+          {reward} SUI
+        </div>
+        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em" }}>REWARD</div>
       </div>
 
       {/* Status badge */}
-      {liveStatus !== null && (
-        <div style={{
-          fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 6,
-          background: `${STATUS_COLORS[liveStatus] ?? "#888"}22`,
-          color: STATUS_COLORS[liveStatus] ?? "#888",
-          border: `1px solid ${STATUS_COLORS[liveStatus] ?? "#888"}44`,
-          whiteSpace: "nowrap",
-        }}>
-          {STATUS_TEXT[liveStatus] ?? "UNKNOWN"}
-        </div>
-      )}
+      <div style={{
+        fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
+        padding: "4px 10px",
+        border: `1px solid ${statusColor}44`,
+        color: statusColor,
+        whiteSpace: "nowrap",
+        minWidth: 90,
+        textAlign: "center",
+      }}>
+        {statusLabel}
+      </div>
 
-      {/* Accept button — only for OPEN contracts */}
-      {account && liveStatus === 0 && (
+      {/* Accept */}
+      {account && liveStatus === 0 ? (
         <button
           onClick={() => onAccept(contractId, "0x2::sui::SUI")}
           style={{
-            background: "rgba(74,158,255,0.12)",
-            border: "1px solid rgba(74,158,255,0.3)",
-            color: "#4a9eff", borderRadius: 8, padding: "8px 20px",
-            cursor: "pointer", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap",
+            background: "transparent",
+            border: "1px solid var(--accent)",
+            color: "var(--accent)",
+            padding: "7px 16px",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.1em",
           }}
+          onMouseEnter={e => { e.currentTarget.style.background = "var(--accent)"; e.currentTarget.style.color = "#fff"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--accent)"; }}
         >
-          Accept
+          ACCEPT
         </button>
+      ) : (
+        <div style={{ width: 80 }} />
       )}
     </div>
   );
 }
 
-// ── Main list component ────────────────────────────────────────────────────────
+// ── Main list ──────────────────────────────────────────────────────────────────
 interface Props { onCreateClick: () => void }
 
 export default function ContractList({ onCreateClick }: Props) {
@@ -139,7 +161,7 @@ export default function ContractList({ onCreateClick }: Props) {
     order: "descending",
   });
 
-  // Keep registry object for stats
+  // Suppress unused warning — used for loading state
   const { isLoading } = useSuiClientQuery("getObject", {
     id: REGISTRY_ID,
     options: { showContent: true },
@@ -158,39 +180,39 @@ export default function ContractList({ onCreateClick }: Props) {
   const contracts = events?.data ?? [];
 
   if (isLoading) return (
-    <div style={{ textAlign: "center", padding: 60, color: "#8aafd4" }}>Loading contracts...</div>
+    <div style={{ textAlign: "center", padding: 60, color: "var(--text-muted)", letterSpacing: "0.1em" }}>
+      LOADING...
+    </div>
   );
 
   if (contracts.length === 0) return (
     <div style={{
       textAlign: "center", padding: 80,
-      border: "1px dashed rgba(74,158,255,0.2)", borderRadius: 12, margin: "24px 0"
+      border: "1px dashed var(--border)", margin: "24px 0",
     }}>
-      <div style={{ fontSize: 32, marginBottom: 16 }}>⚔️</div>
-      <p style={{ color: "#8aafd4", marginBottom: 24 }}>No contracts yet. Be the first to issue one.</p>
+      <div style={{ fontSize: 28, marginBottom: 16, color: "var(--accent)" }}>◆</div>
+      <p style={{ color: "var(--text-dim)", marginBottom: 24, letterSpacing: "0.05em" }}>
+        NO CONTRACTS ISSUED
+      </p>
       {account && (
         <button onClick={onCreateClick} style={{
-          background: "rgba(74,158,255,0.12)", border: "1px solid rgba(74,158,255,0.3)",
-          color: "#4a9eff", borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontSize: 14,
+          background: "transparent",
+          border: "1px solid var(--accent)",
+          color: "var(--accent)",
+          padding: "9px 20px",
+          fontSize: 12, fontWeight: 700, letterSpacing: "0.1em",
         }}>
-          + Issue Contract
+          + ISSUE CONTRACT
         </button>
       )}
     </div>
   );
 
   return (
-    <div style={{ paddingBottom: 60 }}>
-      <div style={{ marginBottom: 16 }}>
-        <h3 style={{ color: "#8aafd4", fontSize: 13, letterSpacing: 2, textTransform: "uppercase" }}>
-          Open Contracts ({contracts.length})
-        </h3>
-      </div>
-      <div style={{ display: "grid", gap: 12 }}>
-        {contracts.map(ev => (
-          <ContractCard key={ev.id.txDigest} ev={ev} onAccept={acceptContract} />
-        ))}
-      </div>
+    <div style={{ display: "grid", gap: 2 }}>
+      {contracts.map(ev => (
+        <ContractCard key={ev.id.txDigest} ev={ev} onAccept={acceptContract} />
+      ))}
     </div>
   );
 }

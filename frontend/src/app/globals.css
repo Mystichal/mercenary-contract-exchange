@@ -1,0 +1,65 @@
+/* EVE Frontier / CCP Design System */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+:root {
+  --bg:           #0B0B0B;
+  --surface:      #111111;
+  --surface-2:    #181818;
+  --surface-hover:#1f1f1f;
+  --text:         #FAFAE5;
+  --text-dim:     rgba(250, 250, 229, 0.55);
+  --text-muted:   rgba(250, 250, 229, 0.3);
+  --accent:       #FF4700;
+  --accent-dim:   rgba(255, 71, 0, 0.12);
+  --accent-border:rgba(255, 71, 0, 0.35);
+  --olive:        #6B6B5E;
+  --olive-dim:    rgba(107, 107, 94, 0.2);
+  --border:       rgba(250, 250, 229, 0.08);
+  --border-bright:rgba(250, 250, 229, 0.18);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--olive); }
+
+/* Focus ring */
+*:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+/* Buttons */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  border-radius: 2px;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+/* Inputs */
+input, select, textarea {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+input::placeholder { color: var(--text-muted); }

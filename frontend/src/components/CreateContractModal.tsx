@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
+import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
-import { useSignAndExecuteTransaction, useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 import { PACKAGE_ID, CLOCK_ID, MISSION_TYPES } from "@/lib/config";
 import SystemInput from "./SystemInput";
 
@@ -20,15 +20,10 @@ export default function CreateContractModal({ onClose }: Props) {
   const [transferable, setTransferable] = useState(false);
   const [error, setError] = useState("");
 
-  // Get user's SUI coins for splitting
-  const { data: coins } = useSuiClientQuery("getCoins", {
-    owner: account?.address ?? "",
-    coinType: "0x2::sui::SUI",
-  }, { enabled: !!account });
-
-  function handleCreate() {
+  function handleSubmit() {
     setError("");
     if (!account) return;
+
     if (!systemId || !rewardSui || !bondSui) {
       setError(!systemId ? "Select a solar system from the list" : "Fill in all fields");
       return;
@@ -40,16 +35,15 @@ export default function CreateContractModal({ onClose }: Props) {
 
     const tx = new Transaction();
 
-    // Split reward and bond coins from gas
-    const [rewardCoin] = tx.splitCoins(tx.gas, [rewardMist]);
-    const [bondCoin]   = tx.splitCoins(tx.gas, [bondMist]);
+    const [rewardCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(rewardMist)]);
+    const [bondCoin]   = tx.splitCoins(tx.gas, [tx.pure.u64(bondMist)]);
 
     tx.moveCall({
       target: `${PACKAGE_ID}::contract::create`,
       typeArguments: ["0x2::sui::SUI"],
       arguments: [
         tx.pure.u8(missionType),
-        tx.pure.vector("u8", []),        // target_id (empty for now)
+        tx.pure.vector("u8", []),
         tx.pure.u64(BigInt(systemId ?? 0)),
         tx.pure.u64(deadlineMs),
         tx.pure.bool(transferable),
@@ -59,101 +53,154 @@ export default function CreateContractModal({ onClose }: Props) {
       ],
     });
 
-    signAndExecute({ transaction: tx }, {
-      onSuccess: () => onClose(),
-      onError: (e) => setError(e.message),
-    });
+    signAndExecute(
+      { transaction: tx },
+      {
+        onSuccess: () => onClose(),
+        onError:   (e) => setError(e.message ?? "Transaction failed"),
+      }
+    );
   }
+
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontSize: 10,
+    letterSpacing: "0.15em",
+    color: "var(--text-dim)",
+    marginBottom: 6,
+    textTransform: "uppercase",
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "10px 12px",
+    marginBottom: 18,
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
+    color: "var(--text)",
+    fontSize: 13,
+    borderRadius: 2,
+  };
+
+  const missionTypes = Object.entries(MISSION_TYPES).map(([k, v]) => ({ k: Number(k), ...v }));
 
   return (
     <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)",
+      position: "fixed", inset: 0, zIndex: 100,
+      background: "rgba(0,0,0,0.85)",
       display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 100, padding: 24,
     }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div style={{
-        background: "#0a1520", border: "1px solid rgba(74,158,255,0.3)",
-        borderRadius: 16, padding: 36, width: "100%", maxWidth: 500,
+        background: "var(--surface)",
+        border: "1px solid var(--border-bright)",
+        width: "100%", maxWidth: 480,
+        maxHeight: "90vh", overflowY: "auto",
       }}>
-        <h2 style={{ color: "#fff", marginBottom: 8, fontSize: 22 }}>Issue Contract</h2>
-        <p style={{ color: "#8aafd4", marginBottom: 28, fontSize: 14 }}>
-          Reward is locked in escrow on-chain until mission is verified.
-        </p>
-
-        {/* Mission type */}
-        <label style={labelStyle}>Mission Type</label>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-          {Object.entries(MISSION_TYPES).map(([k, v]) => (
-            <button key={k}
-              onClick={() => setMissionType(Number(k))}
-              style={{
-                background: missionType === Number(k) ? `${v.color}22` : "transparent",
-                border: `1px solid ${missionType === Number(k) ? v.color : "rgba(255,255,255,0.1)"}`,
-                color: missionType === Number(k) ? v.color : "#8aafd4",
-                borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontSize: 13,
-              }}
-            >{v.label}</button>
-          ))}
+        {/* Header */}
+        <div style={{
+          borderBottom: "1px solid var(--border)",
+          padding: "16px 24px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em" }}>
+            ◆ ISSUE CONTRACT
+          </span>
+          <button onClick={onClose} style={{
+            background: "none", border: "none", color: "var(--text-dim)",
+            fontSize: 18, padding: "0 4px", letterSpacing: 0,
+          }}>✕</button>
         </div>
 
-        {/* Solar system */}
-        <label style={labelStyle}>Solar System</label>
-        <SystemInput value={systemName} onChange={(name, id) => { setSystemName(name); setSystemId(id); }} />
+        <div style={{ padding: "24px 24px 20px" }}>
 
-        {/* Reward */}
-        <label style={labelStyle}>Reward (SUI)</label>
-        <input style={inputStyle} placeholder="e.g. 10.0" type="number"
-          value={rewardSui} onChange={e => setRewardSui(e.target.value)} />
+          {/* Mission type */}
+          <label style={labelStyle}>Mission Type</label>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 18 }}>
+            {missionTypes.map(({ k, label }) => (
+              <button key={k} onClick={() => setMissionType(k)} style={{
+                padding: "9px 12px",
+                background: missionType === k ? "var(--accent-dim)" : "var(--surface-2)",
+                border: missionType === k ? "1px solid var(--accent)" : "1px solid var(--border)",
+                color: missionType === k ? "var(--accent)" : "var(--text-dim)",
+                fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
+                textAlign: "left",
+              }}>
+                {label.toUpperCase()}
+              </button>
+            ))}
+          </div>
 
-        {/* Bond */}
-        <label style={labelStyle}>Issuer Bond (SUI)</label>
-        <input style={inputStyle} placeholder="e.g. 2.0" type="number"
-          value={bondSui} onChange={e => setBondSui(e.target.value)} />
+          {/* Solar system */}
+          <label style={labelStyle}>Solar System</label>
+          <SystemInput value={systemName} onChange={(name, id) => { setSystemName(name); setSystemId(id); }} />
 
-        {/* Deadline */}
-        <label style={labelStyle}>Deadline (days)</label>
-        <input style={inputStyle} placeholder="7" type="number"
-          value={deadlineDays} onChange={e => setDeadlineDays(e.target.value)} />
+          {/* Reward */}
+          <label style={labelStyle}>Reward (SUI)</label>
+          <input style={inputStyle} type="number" min="0" step="0.1"
+            placeholder="e.g. 1.0"
+            value={rewardSui} onChange={e => setRewardSui(e.target.value)} />
 
-        {/* Transferable */}
-        <label style={{ display: "flex", alignItems: "center", gap: 10, color: "#8aafd4", fontSize: 14, marginBottom: 24, cursor: "pointer" }}>
-          <input type="checkbox" checked={transferable} onChange={e => setTransferable(e.target.checked)} />
-          Allow execution rights to be resold
-        </label>
+          {/* Bond */}
+          <label style={labelStyle}>Bond (SUI)</label>
+          <input style={inputStyle} type="number" min="0" step="0.1"
+            placeholder="e.g. 0.5"
+            value={bondSui} onChange={e => setBondSui(e.target.value)} />
 
-        {error && (
-          <div style={{ color: "#ff6b6b", fontSize: 13, marginBottom: 16 }}>{error}</div>
-        )}
+          {/* Deadline */}
+          <label style={labelStyle}>Deadline (Days)</label>
+          <input style={inputStyle} type="number" min="1" max="30"
+            value={deadlineDays} onChange={e => setDeadlineDays(e.target.value)} />
 
-        <div style={{ display: "flex", gap: 12 }}>
-          <button onClick={onClose} style={{
-            flex: 1, background: "transparent",
-            border: "1px solid rgba(255,255,255,0.1)",
-            color: "#8aafd4", borderRadius: 8, padding: 14, cursor: "pointer", fontSize: 14,
-          }}>Cancel</button>
-          <button onClick={handleCreate} disabled={isPending} style={{
-            flex: 2, background: isPending ? "rgba(74,158,255,0.3)" : "#4a9eff",
-            border: "none", color: "#050a12", borderRadius: 8, padding: 14,
-            cursor: isPending ? "not-allowed" : "pointer", fontSize: 15, fontWeight: 700,
-          }}>
-            {isPending ? "Signing..." : "Lock Reward & Issue"}
+          {/* Transferable */}
+          <label style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24, cursor: "pointer" }}>
+            <div
+              onClick={() => setTransferable(!transferable)}
+              style={{
+                width: 16, height: 16,
+                border: `1px solid ${transferable ? "var(--accent)" : "var(--border-bright)"}`,
+                background: transferable ? "var(--accent)" : "transparent",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              {transferable && <span style={{ color: "#fff", fontSize: 10, lineHeight: 1 }}>✓</span>}
+            </div>
+            <span style={{ fontSize: 11, color: "var(--text-dim)", letterSpacing: "0.08em" }}>
+              TRANSFERABLE EXECUTION RIGHTS
+            </span>
+          </label>
+
+          {error && (
+            <div style={{
+              fontSize: 11, color: "#ff4a4a",
+              border: "1px solid rgba(255,74,74,0.3)",
+              padding: "8px 12px", marginBottom: 16,
+              letterSpacing: "0.05em",
+            }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleSubmit}
+            disabled={isPending}
+            style={{
+              width: "100%",
+              background: isPending ? "var(--olive)" : "var(--accent)",
+              border: "none",
+              color: "#fff",
+              padding: "12px",
+              fontSize: 12, fontWeight: 700, letterSpacing: "0.12em",
+              opacity: isPending ? 0.7 : 1,
+              cursor: isPending ? "not-allowed" : "pointer",
+            }}
+          >
+            {isPending ? "BROADCASTING..." : "ISSUE CONTRACT"}
           </button>
         </div>
       </div>
     </div>
   );
 }
-
-const labelStyle: React.CSSProperties = {
-  display: "block", fontSize: 12, letterSpacing: 1,
-  color: "#8aafd4", textTransform: "uppercase", marginBottom: 8,
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%", background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(74,158,255,0.2)", borderRadius: 8,
-  color: "#e0eaf8", padding: "12px 14px", fontSize: 14,
-  outline: "none", marginBottom: 20,
-};

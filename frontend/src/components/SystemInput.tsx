@@ -26,10 +26,6 @@ export default function SystemInput({ value, onChange }: Props) {
     }, 300);
   }, [value]);
 
-  function handleInput(v: string) {
-    onChange(v, null); // clear id until a system is picked
-  }
-
   function pick(sys: SolarSystem) {
     onChange(sys.name, sys.id);
     setOpen(false);
@@ -37,21 +33,28 @@ export default function SystemInput({ value, onChange }: Props) {
   }
 
   return (
-    <div style={{ position: "relative", marginBottom: 20 }}>
+    <div style={{ position: "relative", marginBottom: 18 }}>
       <div style={{ position: "relative" }}>
         <input
           style={{
-            width: "100%", background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(74,158,255,0.2)", borderRadius: 8,
-            color: "#e0eaf8", padding: "12px 40px 12px 14px", fontSize: 14, outline: "none",
+            width: "100%",
+            padding: "10px 36px 10px 12px",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            color: "var(--text)",
+            fontSize: 13,
+            borderRadius: 2,
           }}
-          placeholder="Type a system name (e.g. A 2560, M 974...)"
+          placeholder="TYPE SYSTEM NAME..."
           value={value}
-          onChange={e => handleInput(e.target.value)}
+          onChange={e => onChange(e.target.value, null)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
         />
         {loading && (
-          <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "#4a9eff", fontSize: 12 }}>
+          <span style={{
+            position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+            color: "var(--accent)", fontSize: 10, letterSpacing: "0.1em",
+          }}>
             ...
           </span>
         )}
@@ -60,22 +63,26 @@ export default function SystemInput({ value, onChange }: Props) {
       {open && (
         <div style={{
           position: "absolute", top: "100%", left: 0, right: 0, zIndex: 200,
-          background: "#0d1e30", border: "1px solid rgba(74,158,255,0.25)",
-          borderRadius: 8, marginTop: 4, overflow: "hidden", maxHeight: 280, overflowY: "auto",
+          background: "var(--surface-2)",
+          border: "1px solid var(--border-bright)",
+          borderTop: "1px solid var(--accent)",
+          maxHeight: 240, overflowY: "auto",
         }}>
           {results.map(sys => (
             <div key={sys.id}
               onMouseDown={() => pick(sys)}
               style={{
-                padding: "10px 14px", cursor: "pointer", display: "flex",
-                alignItems: "center", gap: 10,
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                padding: "9px 12px", cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 12,
+                borderBottom: "1px solid var(--border)",
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(74,158,255,0.08)")}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--accent-dim)")}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
-              <span style={{ color: "#e0eaf8", fontSize: 14, flex: 1 }}>{sys.name}</span>
-              <span style={{ color: "#8aafd4", fontSize: 12 }}>#{sys.id}</span>
+              <span style={{ color: "var(--text)", fontSize: 13, flex: 1, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                {sys.name}
+              </span>
+              <span style={{ color: "var(--text-muted)", fontSize: 11 }}>#{sys.id}</span>
             </div>
           ))}
         </div>

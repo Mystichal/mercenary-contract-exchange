@@ -9,66 +9,91 @@ export default function Home() {
   const [showCreate, setShowCreate] = useState(false);
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
 
-      {/* Header */}
+      {/* Top nav */}
       <header style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "24px 0", borderBottom: "1px solid rgba(74,158,255,0.15)"
+        borderBottom: "1px solid var(--border)",
+        padding: "0 32px",
+        height: 56,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        background: "var(--surface)",
       }}>
-        <div>
-          <div style={{ fontSize: 11, letterSpacing: 3, color: "#4a9eff", textTransform: "uppercase", marginBottom: 4 }}>
-            EVE Frontier · Testnet
-          </div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "#fff" }}>
-            Mercenary Contract Exchange
-          </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <span style={{ color: "var(--accent)", fontSize: 18, fontWeight: 700, letterSpacing: "0.12em" }}>
+            ◆ MCE
+          </span>
+          <span style={{ color: "var(--border-bright)", fontSize: 12 }}>|</span>
+          <span style={{ color: "var(--text-dim)", fontSize: 11, letterSpacing: "0.1em" }}>
+            MERCENARY CONTRACT EXCHANGE
+          </span>
         </div>
-        <ConnectButton style={{
-          background: "rgba(74,158,255,0.12)",
-          border: "1px solid rgba(74,158,255,0.3)",
-          color: "#4a9eff",
-          borderRadius: 8,
-          padding: "10px 20px",
-          cursor: "pointer",
-          fontSize: 14,
-          fontWeight: 500,
-        }} />
+        <ConnectButton />
       </header>
 
       {/* Hero */}
-      <section style={{ padding: "48px 0 32px", textAlign: "center" }}>
-        <p style={{ fontSize: 13, letterSpacing: 3, color: "#4a9eff", textTransform: "uppercase", marginBottom: 16 }}>
-          Missions as Financial Instruments
-        </p>
-        <h2 style={{ fontSize: 40, fontWeight: 700, color: "#fff", lineHeight: 1.2, marginBottom: 16 }}>
-          Issue. Execute. Settle.
-        </h2>
-        <p style={{ fontSize: 18, color: "#8aafd4", maxWidth: 560, margin: "0 auto 32px" }}>
-          Pre-funded contracts verified by world state.
-          No trust required.
-        </p>
-        {account && (
-          <button onClick={() => setShowCreate(true)} style={{
-            background: "#4a9eff",
-            border: "none",
-            color: "#050a12",
-            borderRadius: 8,
-            padding: "14px 32px",
-            cursor: "pointer",
-            fontSize: 15,
-            fontWeight: 700,
-            letterSpacing: 1,
+      <div style={{
+        borderBottom: "1px solid var(--border)",
+        padding: "40px 32px 32px",
+        background: `linear-gradient(180deg, rgba(255,71,0,0.04) 0%, transparent 100%)`,
+      }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <p style={{
+            fontSize: 11, letterSpacing: "0.2em", color: "var(--accent)",
+            textTransform: "uppercase", marginBottom: 10,
           }}>
-            + Issue Contract
-          </button>
-        )}
-      </section>
+            EVE FRONTIER — TESTNET
+          </p>
+          <h1 style={{
+            fontSize: 28, fontWeight: 700, letterSpacing: "0.06em",
+            textTransform: "uppercase", color: "var(--text)", marginBottom: 12,
+          }}>
+            MERCENARY CONTRACT EXCHANGE
+          </h1>
+          <p style={{ color: "var(--text-dim)", maxWidth: 560, fontSize: 13, lineHeight: 1.7 }}>
+            Issue operational missions as on-chain instruments.
+            Mercenaries execute. World-state events settle automatically.
+          </p>
+        </div>
+      </div>
 
-      {/* Contract list */}
-      <ContractList onCreateClick={() => setShowCreate(true)} />
+      {/* Main */}
+      <main style={{ maxWidth: 900, margin: "0 auto", padding: "32px 32px 80px" }}>
 
-      {/* Create modal */}
+        {/* Actions bar */}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          marginBottom: 24,
+        }}>
+          <span style={{
+            fontSize: 11, letterSpacing: "0.15em", color: "var(--text-dim)",
+            textTransform: "uppercase",
+          }}>
+            ACTIVE CONTRACTS
+          </span>
+          {account && (
+            <button
+              onClick={() => setShowCreate(true)}
+              style={{
+                background: "var(--accent)",
+                color: "#fff",
+                border: "none",
+                padding: "9px 20px",
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+              }}
+            >
+              + ISSUE CONTRACT
+            </button>
+          )}
+        </div>
+
+        <ContractList onCreateClick={() => setShowCreate(true)} />
+      </main>
+
       {showCreate && <CreateContractModal onClose={() => setShowCreate(false)} />}
     </div>
   );
