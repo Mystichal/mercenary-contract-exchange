@@ -32,14 +32,10 @@ export default function SystemInput({ value, onChange }: Props) {
   }
 
   return (
-    <div style={{ position: "relative", marginBottom: 16 }}>
+    <div style={{ position: "relative", marginBottom: 20 }}>
       <div style={{ position: "relative" }}>
         <input
-          style={{
-            width: "100%", padding: "9px 32px 9px 11px",
-            background: "var(--surface-input)", border: "1px solid var(--border-bright)",
-            color: "var(--text-bright)", fontSize: 12, borderRadius: 0,
-          }}
+          style={{ paddingRight: 32, marginBottom: 0 }}
           placeholder="TYPE SYSTEM NAME..."
           value={value}
           onChange={e => onChange(e.target.value, null)}
@@ -56,9 +52,9 @@ export default function SystemInput({ value, onChange }: Props) {
       {open && (
         <div style={{
           position: "absolute", top: "100%", left: 0, right: 0, zIndex: 200,
-          background: "var(--panel-header)",
-          border: "1px solid var(--border-bright)",
-          borderTop: "1px solid var(--accent)",
+          background: "var(--panel-raised)",
+          border: "1px solid var(--border-vis)",
+          borderTop: "2px solid var(--accent)",
           maxHeight: 220, overflowY: "auto",
         }}>
           {results.map(sys => (
@@ -67,12 +63,12 @@ export default function SystemInput({ value, onChange }: Props) {
               style={{
                 padding: "8px 12px", cursor: "pointer",
                 display: "flex", alignItems: "center", gap: 12,
-                borderBottom: "1px solid var(--border)",
+                borderBottom: "1px solid var(--border-vis)",
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = "var(--panel-hover)")}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--accent-dim)")}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
-              <span style={{ color: "var(--text-bright)", fontSize: 12, flex: 1, letterSpacing: "0.05em" }}>
+              <span style={{ color: "var(--text)", fontSize: 12, flex: 1, letterSpacing: "0.05em" }}>
                 {sys.name}
               </span>
               <span style={{ color: "var(--text-muted)", fontSize: 10 }}>#{sys.id}</span>

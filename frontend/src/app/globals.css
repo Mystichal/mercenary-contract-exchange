@@ -1,36 +1,32 @@
-/* EVE Frontier — In-Game UI Style */
+/* EVE Frontier Web UI — frontier.evefrontier.com */
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 :root {
-  --bg:             #0a0908;      /* near-black, very slight warm tint */
-  --panel:          #161412;      /* panel background — visible against bg */
-  --panel-header:   #1e1b18;      /* panel header row — slightly lighter */
-  --panel-hover:    #1c1916;      /* hover state */
-  --surface-input:  #111010;      /* form inputs */
+  --bg:           #0e0e0e;
+  --nav:          #161614;
+  --panel:        #181816;
+  --panel-raised: #1e1d1a;
 
-  --text:           #d4cfc8;      /* warm off-white, not pure white */
-  --text-bright:    #ede8e0;      /* titles, values */
-  --text-dim:       #7a756e;      /* labels, metadata */
-  --text-muted:     #4a4642;      /* placeholders, very dim */
+  --text:         #FAFAE5;        /* CCP exact — warm cream */
+  --text-dim:     rgba(250,250,229,0.45);
+  --text-muted:   rgba(250,250,229,0.22);
 
-  --accent:         #FF4700;      /* primary — CCP design system exact */
-  --accent-dim:     rgba(255, 71, 0, 0.12);
-  --btn-fill:       #FF4700;      /* primary button — full orange */
-  --btn-fill-hover: #e03f00;      /* primary hover — slightly darker */
-  --btn-disabled:   #6b2e18;      /* disabled state */
-  --btn-secondary:  #6B6B5E;      /* secondary button */
-  --btn-secondary-h:#7a7a6d;      /* secondary hover */
-  --btn-border:     transparent;
+  --accent:       #FF4700;        /* CCP primary orange — exact */
+  --accent-hover: #e03f00;
+  --accent-dim:   rgba(255,71,0,0.12);
 
-  --border:         rgba(255, 255, 255, 0.06);   /* subtle panel border */
-  --border-bright:  rgba(255, 255, 255, 0.12);   /* column/row dividers */
-  --border-accent:  rgba(255, 71, 0, 0.4);       /* selected/active border */
+  --secondary:    #6B6B5E;        /* CCP secondary */
+  --secondary-h:  #7a7a6d;
 
-  --olive:          #4a4840;
-  --status-open:    #FF4700;
-  --status-active:  #7acc7a;
-  --status-done:    #6a6560;
-  --status-failed:  #cc4444;
+  /* Input borders — clearly visible, cream-toned */
+  --input-bg:     #111110;
+  --input-border: rgba(250,250,229,0.35);
+  --input-focus:  rgba(250,250,229,0.7);
+  --input-accent: #FF4700;        /* left-side accent on focus */
+
+  /* Row / panel borders */
+  --border:       rgba(250,250,229,0.07);
+  --border-vis:   rgba(250,250,229,0.18);  /* visible dividers */
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,7 +42,7 @@ html, body {
 
 ::-webkit-scrollbar       { width: 3px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--olive); }
+::-webkit-scrollbar-thumb { background: var(--secondary); }
 
 *:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
@@ -54,20 +50,49 @@ button {
   font-family: inherit;
   cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   font-size: 11px;
   border-radius: 0;
   transition: background 0.1s, border-color 0.1s, color 0.1s;
 }
 
+/* Primary — solid orange */
+.btn-primary {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: 10px 24px;
+  font-weight: 700;
+}
+.btn-primary:hover  { background: var(--accent-hover); }
+.btn-primary:disabled { background: #6b2e18; cursor: not-allowed; opacity: 0.7; }
+
+/* Secondary/outlined — transparent with cream border (BUILD YOUR TRIBE style) */
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-vis);
+  color: var(--text);
+  padding: 10px 24px;
+}
+.btn-outline:hover { border-color: var(--text); }
+
+/* Inputs — dark bg, visible cream border, orange left accent on focus */
 input, select, textarea {
   font-family: inherit;
   font-size: 12px;
   color: var(--text);
-  background: var(--surface-input);
-  border: 1px solid var(--border-bright);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 0;
-  transition: border-color 0.15s;
+  padding: 10px 12px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s, border-left-color 0.15s;
+  letter-spacing: 0.05em;
 }
-input:focus, select:focus { border-color: var(--accent); outline: none; }
-input::placeholder { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+input:focus, select:focus, textarea:focus {
+  border-color: var(--input-focus);
+  border-left-color: var(--input-accent);
+  border-left-width: 2px;
+}
+input::placeholder { color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
