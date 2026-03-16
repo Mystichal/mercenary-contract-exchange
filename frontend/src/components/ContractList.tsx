@@ -67,7 +67,7 @@ function ContractCard({ ev, onAccept }: {
       </div>
 
       {/* Accept button */}
-      {account && p?.issuer !== account.address && (
+      {account && (
         <button
           onClick={() => onAccept(p?.contract_id as string, "0x2::sui::SUI")}
           style={{
