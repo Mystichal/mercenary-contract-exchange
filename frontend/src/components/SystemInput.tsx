@@ -32,11 +32,11 @@ export default function SystemInput({ value, onChange }: Props) {
   }
 
   return (
-    <div style={{ position: "relative", marginBottom: 20 }}>
+    <div style={{ position: "relative" }}>
       <div style={{ position: "relative" }}>
         <input
-          style={{ paddingRight: 32, marginBottom: 0 }}
-          placeholder="TYPE SYSTEM NAME..."
+          style={{ paddingRight: 32 }}
+          placeholder="Type system name..."
           value={value}
           onChange={e => onChange(e.target.value, null)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
@@ -44,34 +44,17 @@ export default function SystemInput({ value, onChange }: Props) {
         {loading && (
           <span style={{
             position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
-            color: "var(--accent)", fontSize: 10,
-          }}>···</span>
+            color: "var(--primary)", fontSize: 10, letterSpacing: "0.1em",
+          }}>{"\u00B7\u00B7\u00B7"}</span>
         )}
       </div>
 
       {open && (
-        <div style={{
-          position: "absolute", top: "100%", left: 0, right: 0, zIndex: 200,
-          background: "var(--panel-raised)",
-          border: "1px solid var(--border-vis)",
-          borderTop: "2px solid var(--accent)",
-          maxHeight: 220, overflowY: "auto",
-        }}>
+        <div className="dropdown-list">
           {results.map(sys => (
-            <div key={sys.id}
-              onMouseDown={() => pick(sys)}
-              style={{
-                padding: "8px 12px", cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 12,
-                borderBottom: "1px solid var(--border-vis)",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = "var(--accent-dim)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-            >
-              <span style={{ color: "var(--text)", fontSize: 12, flex: 1, letterSpacing: "0.05em" }}>
-                {sys.name}
-              </span>
-              <span style={{ color: "var(--text-muted)", fontSize: 10 }}>#{sys.id}</span>
+            <div key={sys.id} className="dropdown-item" onMouseDown={() => pick(sys)}>
+              <span className="dropdown-item-name">{sys.name}</span>
+              <span className="dropdown-item-id">#{sys.id}</span>
             </div>
           ))}
         </div>

@@ -17,7 +17,7 @@ function useSystemName(id: number | undefined): string {
         if (sys) setName(sys.name);
       }).catch(() => {});
   }, [id]);
-  return name || (id ? `#${id}` : "—");
+  return name || (id ? `#${id}` : "\u2014");
 }
 
 function useLiveStatus(contractId: string | undefined): number | null {
@@ -35,86 +35,57 @@ function useLiveStatus(contractId: string | undefined): number | null {
 }
 
 const STATUS_LABEL: Record<number, string> = { 0: "OPEN", 1: "ACTIVE", 2: "COMPLETED", 3: "FAILED", 4: "DISPUTED" };
-const STATUS_COLOR: Record<number, string> = {
-  0: "var(--status-open)",
-  1: "var(--status-active)",
-  2: "var(--status-done)",
-  3: "var(--status-failed)",
-  4: "#c040f0",
-};
+const STATUS_CLASS: Record<number, string> = { 0: "open", 1: "active", 2: "completed", 3: "failed", 4: "disputed" };
 
-// ── Contract Row ───────────────────────────────────────────────────────────────
-function ContractRow({ ev, onAccept, isOdd }: {
+// ── Contract Row ────────────────────────────────────────────────────────────────
+function ContractRow({ ev, onAccept }: {
   ev: { id: { txDigest: string }; parsedJson: unknown };
   onAccept: (contractId: string) => void;
-  isOdd: boolean;
 }) {
-  const account  = useCurrentAccount();
-  const p        = ev.parsedJson as Record<string, unknown>;
-  const rawId    = p?.contract_id;
+  const account = useCurrentAccount();
+  const p = ev.parsedJson as Record<string, unknown>;
+  const rawId = p?.contract_id;
   const contractId = typeof rawId === "string" ? rawId : (rawId as Record<string, string>)?.id ?? "";
-  const mType    = MISSION_TYPES[(p?.mission_type as number)] ?? MISSION_TYPES[2];
-  const reward   = p?.reward_amount ? (Number(p.reward_amount) / 1e9).toFixed(2) : "?";
+  const mType = MISSION_TYPES[(p?.mission_type as number)] ?? MISSION_TYPES[2];
+  const reward = p?.reward_amount ? (Number(p.reward_amount) / 1e9).toFixed(2) : "?";
   const systemName = useSystemName(p?.solar_system_id ? Number(p.solar_system_id) : undefined);
   const liveStatus = useLiveStatus(contractId);
-  const issuer   = p?.issuer as string ?? "";
+  const issuer = p?.issuer as string ?? "";
 
   const statusLabel = liveStatus !== null ? (STATUS_LABEL[liveStatus] ?? "?") : "...";
-  const statusColor = liveStatus !== null ? (STATUS_COLOR[liveStatus] ?? "var(--text-dim)") : "var(--text-muted)";
+  const statusClass = liveStatus !== null ? (STATUS_CLASS[liveStatus] ?? "") : "";
   const isOpen = liveStatus === 0;
 
   return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "140px 1fr 80px 110px 90px",
-      alignItems: "center",
-      padding: "12px 20px",
-      background: isOdd ? "var(--panel)" : "var(--panel-header)",
-      borderBottom: "1px solid var(--border)",
-      gap: 16,
-    }}
-    onMouseEnter={e => (e.currentTarget.style.background = "var(--panel-hover)")}
-    onMouseLeave={e => (e.currentTarget.style.background = isOdd ? "var(--panel)" : "var(--panel-header)")}
-    >
-      {/* Mission type */}
-      <div style={{ color: "var(--text-dim)", fontSize: 10, letterSpacing: "0.1em" }}>
-        {mType.label.toUpperCase()}
-      </div>
+    <div className="contract-row">
+      <div className="contract-type">{mType.label}</div>
 
-      {/* Location + issuer */}
       <div>
-        <div style={{ color: "var(--text-bright)", fontSize: 13, letterSpacing: "0.05em" }}>
-          {systemName}
-        </div>
-        <div style={{ color: "var(--text-muted)", fontSize: 10, marginTop: 2 }}>
-          {issuer.slice(0, 8)}...{issuer.slice(-6)}
+        <div className="contract-location">{systemName}</div>
+        <div className="contract-issuer">
+          {issuer.slice(0, 8)}\u2026{issuer.slice(-6)}
         </div>
       </div>
 
-      {/* Reward */}
-      <div style={{ textAlign: "right" }}>
-        <div style={{ color: "var(--text-bright)", fontSize: 13, fontWeight: 700 }}>{reward}</div>
-        <div style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: "0.1em" }}>SUI</div>
+      <div className="contract-reward">
+        <div className="contract-reward-value">{reward}</div>
+        <div className="contract-reward-unit">SUI</div>
       </div>
 
-      {/* Status */}
-      <div style={{ textAlign: "center" }}>
-        <span style={{
-          fontSize: 10, letterSpacing: "0.12em", fontWeight: 700,
-          color: statusColor,
-          borderBottom: `1px solid ${statusColor}`,
-          paddingBottom: 1,
-        }}>
-          {statusLabel}
+      <div className="contract-status">
+        <span className={`status-badge ${statusClass}`}>
+          <svg className="status-dot" viewBox="0 0 6 6" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="3" cy="3" r="3" />
+          </svg>
+          <span className="status-text">{statusLabel}</span>
         </span>
       </div>
 
-      {/* Action */}
-      <div style={{ textAlign: "right" }}>
+      <div className="contract-action">
         {account && isOpen ? (
           <button className="btn-primary" onClick={() => onAccept(contractId)}
-            style={{ padding: "6px 16px", fontSize: 10 }}>
-            ACCEPT
+            style={{ padding: "6px 14px", fontSize: 9 }}>
+            Accept
           </button>
         ) : null}
       </div>
@@ -122,28 +93,7 @@ function ContractRow({ ev, onAccept, isOdd }: {
   );
 }
 
-// ── Table header ───────────────────────────────────────────────────────────────
-function TableHeader() {
-  return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "140px 1fr 80px 110px 90px",
-      padding: "8px 20px",
-      borderBottom: "1px solid var(--border-bright)",
-      background: "var(--panel-header)",
-      gap: 16,
-    }}>
-      {["MISSION", "LOCATION / ISSUER", "REWARD", "STATUS", ""].map((h, i) => (
-        <div key={i} style={{
-          fontSize: 9, letterSpacing: "0.18em", color: "var(--text-muted)",
-          textAlign: i === 2 ? "right" : i === 3 ? "center" : "left",
-        }}>{h}</div>
-      ))}
-    </div>
-  );
-}
-
-// ── Main ───────────────────────────────────────────────────────────────────────
+// ── Main ────────────────────────────────────────────────────────────────────────
 interface Props { onCreateClick: () => void }
 
 export default function ContractList({ onCreateClick }: Props) {
@@ -156,7 +106,6 @@ export default function ContractList({ onCreateClick }: Props) {
     order: "descending",
   });
 
-  // Keep for registry stats (suppress lint by using variable)
   void useSuiClientQuery("getObject", { id: REGISTRY_ID, options: { showContent: true } });
 
   function acceptContract(contractId: string) {
@@ -172,34 +121,38 @@ export default function ContractList({ onCreateClick }: Props) {
   const contracts = events?.data ?? [];
 
   if (isLoading) return (
-    <div style={{ padding: "40px 0", color: "var(--text-muted)", letterSpacing: "0.15em", fontSize: 11 }}>
-      LOADING...
+    <div className="loading-state">
+      <div className="loading-bar">
+        <span /><span /><span /><span />
+      </div>
+      <div className="loading-text">Scanning contracts...</div>
     </div>
   );
 
   if (contracts.length === 0) return (
-    <div style={{
-      padding: "60px 40px", textAlign: "center",
-      border: "1px solid var(--border-bright)",
-      background: "var(--panel)",
-    }}>
-      <div style={{ color: "var(--text-dim)", fontSize: 11, letterSpacing: "0.15em", marginBottom: 20 }}>
-        NO CONTRACTS ON BOARD
-      </div>
+    <div className="empty-state">
+      <div className="empty-state-icon">{"\u2302"}</div>
+      <div className="empty-state-text">No contracts on board</div>
       {account && (
         <button className="btn-primary" onClick={onCreateClick}
-          style={{ padding: "9px 22px", fontSize: 11 }}>
-          + ISSUE CONTRACT
+          style={{ padding: "10px 24px", fontSize: 11 }}>
+          + Issue Contract
         </button>
       )}
     </div>
   );
 
   return (
-    <div style={{ border: "1px solid var(--border-bright)" }}>
-      <TableHeader />
-      {contracts.map((ev, i) => (
-        <ContractRow key={ev.id.txDigest} ev={ev} onAccept={acceptContract} isOdd={i % 2 === 0} />
+    <div className="contract-table">
+      <div className="contract-table-head">
+        <span>Mission</span>
+        <span>Location / Issuer</span>
+        <span style={{ textAlign: "right" }}>Reward</span>
+        <span style={{ textAlign: "center" }}>Status</span>
+        <span />
+      </div>
+      {contracts.map(ev => (
+        <ContractRow key={ev.id.txDigest} ev={ev} onAccept={acceptContract} />
       ))}
     </div>
   );
