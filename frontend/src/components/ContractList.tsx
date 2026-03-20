@@ -4,6 +4,7 @@ import { useSuiClientQuery, useSuiClient, useCurrentAccount, useSignAndExecuteTr
 import { Transaction } from "@mysten/sui/transactions";
 import { PACKAGE_ID, REGISTRY_ID, CLOCK_ID, MISSION_TYPES } from "@/lib/config";
 import { SYSTEMS_API } from "@/lib/systems";
+import { getCharacterByWallet } from "@/lib/graphql";
 
 function useSystemName(id: number | undefined): string {
   const [name, setName] = useState<string>("");
@@ -18,6 +19,21 @@ function useSystemName(id: number | undefined): string {
       }).catch(() => {});
   }, [id]);
   return name || (id ? `#${id}` : "\u2014");
+}
+
+/** Resolve a wallet address to an EVE character ID for display */
+function useCharacter(walletAddress: string | undefined): string {
+  const [label, setLabel] = useState<string>("");
+  useEffect(() => {
+    if (!walletAddress) return;
+    getCharacterByWallet(walletAddress)
+      .then(c => {
+        if (c) setLabel(`${c.characterId.slice(0, 8)}…`);
+      })
+      .catch(() => {});
+  }, [walletAddress]);
+  // Fallback to shortened wallet if no character found
+  return label || (walletAddress ? `${walletAddress.slice(0, 8)}…${walletAddress.slice(-6)}` : "—");
 }
 
 function useLiveStatus(contractId: string | undefined): number | null {
@@ -51,6 +67,7 @@ function ContractRow({ ev, onAccept }: {
   const systemName = useSystemName(p?.solar_system_id ? Number(p.solar_system_id) : undefined);
   const liveStatus = useLiveStatus(contractId);
   const issuer = p?.issuer as string ?? "";
+  const issuerLabel = useCharacter(issuer);
 
   const statusLabel = liveStatus !== null ? (STATUS_LABEL[liveStatus] ?? "?") : "...";
   const statusClass = liveStatus !== null ? (STATUS_CLASS[liveStatus] ?? "") : "";
@@ -63,7 +80,7 @@ function ContractRow({ ev, onAccept }: {
       <div>
         <div className="contract-location">{systemName}</div>
         <div className="contract-issuer">
-          {issuer.slice(0, 8)}\u2026{issuer.slice(-6)}
+          {issuerLabel}
         </div>
       </div>
 

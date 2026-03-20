@@ -13,6 +13,7 @@
 import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
+import { getAssemblyState } from "./graphql.ts";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const PACKAGE_ID    = "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150";
@@ -156,6 +157,41 @@ async function settle(
   return result;
 }
 
+// ── Direct state polling (DEFEND_BASE fallback) ───────────────────────────────
+/**
+ * For DEFEND_BASE contracts, the StatusChangedEvent may have fired before the
+ * verifier started watching (e.g. assembly was already online when contract was
+ * accepted). This polls the assembly object's live state via GraphQL as a fallback.
+ *
+ * Requires the contract's target_assembly_id field to be set.
+ */
+async function pollAssemblyState(
+  contracts: ActiveContract[],
+  keypair: Ed25519Keypair,
+): Promise<void> {
+  const defendContracts = contracts.filter(c => c.missionType === MISSION_DEFEND);
+  if (!defendContracts.length) return;
+
+  for (const contract of defendContracts) {
+    const assemblyId = (contract as ActiveContract & { assemblyId?: string }).assemblyId;
+    if (!assemblyId) continue;
+
+    try {
+      const state = await getAssemblyState(assemblyId);
+      if (!state) continue;
+
+      const systemMatch = state.solarSystemId === contract.solarSystemId;
+      if (state.isOnline && systemMatch) {
+        console.log(`[verifier] DEFEND_BASE match via GraphQL state poll — assembly ${assemblyId} is ONLINE`);
+        await settle(contract, assemblyId, true, keypair);
+        contracts.splice(contracts.indexOf(contract), 1);
+      }
+    } catch (e) {
+      console.warn(`[verifier] Assembly state poll failed for ${assemblyId}:`, e);
+    }
+  }
+}
+
 // ── Polling loop ──────────────────────────────────────────────────────────────
 async function poll(
   cursors: Map<string, string | null>,
@@ -220,7 +256,11 @@ async function main() {
 
   while (true) {
     try {
+      // Event-based polling (all mission types)
       await poll(cursors, contracts, keypair);
+
+      // Direct GraphQL state poll for DEFEND_BASE (catches already-online assemblies)
+      await pollAssemblyState(contracts, keypair);
 
       // Refresh contract list every 15s to catch newly accepted contracts
       if (Date.now() - lastRefresh > 15_000) {
