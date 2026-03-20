@@ -1,10 +1,16 @@
-/// World State Verifier — reads EVE Frontier world events to verify mission completion.
+/// Mercenary Contract Exchange — World State Verifier
 ///
-/// This is the critical piece that connects smart contract settlement
-/// to actual in-game events (KillmailCreatedEvent, StatusChangedEvent, etc.)
+/// Connects on-chain settlement to EVE Frontier world events.
+/// Trusted MVP: VerifierCap holder submits proof tx digest.
+/// Future: trustless oracle referencing world-contracts events directly.
 ///
-/// For hackathon MVP: a trusted VerifierCap holder submits proof.
-/// Future: trustless verification via world-contracts event references.
+/// World event → contract type mapping:
+///   KillmailCreatedEvent   → DESTROY_TARGET (2), BOUNTY (7)
+///   StatusChangedEvent     → DEFEND_BASE (1)
+///   ItemDepositedEvent     → DELIVER_CARGO (3)
+///   ScanResultEvent        → SCOUT (6)
+///   PatrolConfirmedEvent   → PATROL_ZONE (4)
+///   EscortCompletedEvent   → ESCORT (5)
 module mercenary_exchange::verifier {
     use sui::object::{Self, UID, ID};
     use sui::tx_context::TxContext;
@@ -13,41 +19,40 @@ module mercenary_exchange::verifier {
     use sui::clock::Clock;
     use mercenary_exchange::contract::{Self, MercenaryContract};
 
-    // ── Mission type constants (must match contract.move) ──────────────────
-    const MISSION_DEFEND_BASE:    u8 = 1;
-    const MISSION_DESTROY_TARGET: u8 = 2;
-    const MISSION_DELIVER_CARGO:  u8 = 3;
-
-    // ── Structs ────────────────────────────────────────────────────────────
-
+    // ── VerifierCap ────────────────────────────────────────────────────────
     /// Trusted verifier capability.
-    /// Holder can submit verification results.
-    /// For MVP: issued to the hackathon deployer.
-    /// Future: issued to a multi-sig or DAO.
+    /// MVP: issued to deployer.
+    /// Future: multi-sig, DAO, or ZK oracle.
     public struct VerifierCap has key, store { id: UID }
 
+    // ── Events ─────────────────────────────────────────────────────────────
     public struct VerificationSubmittedEvent has copy, drop {
         contract_id:    ID,
         mission_type:   u8,
         success:        bool,
-        /// The EVE world transaction that proves the outcome
+        world_tx_proof: vector<u8>,
+    }
+
+    public struct TieredVerificationSubmittedEvent has copy, drop {
+        contract_id:    ID,
+        mission_type:   u8,
+        executors:      vector<address>,
+        shares_bps:     vector<u64>,
         world_tx_proof: vector<u8>,
     }
 
     fun init(ctx: &mut TxContext) {
-        let cap = VerifierCap { id: object::new(ctx) };
-        transfer::transfer(cap, ctx.sender());
+        transfer::transfer(VerifierCap { id: object::new(ctx) }, ctx.sender());
     }
 
-    // ── Verify & Settle ────────────────────────────────────────────────────
-
-    /// Submit a verification result for a mission.
-    /// `world_tx_proof` is the Sui tx digest that contains the relevant
-    /// world-contracts event (KillmailCreatedEvent, StatusChangedEvent, etc.)
-    ///
-    /// For MISSION_DESTROY_TARGET: proof must be a KillmailCreatedEvent tx.
-    /// For MISSION_DEFEND_BASE:    proof must be a StatusChangedEvent tx showing base online.
-    /// For MISSION_DELIVER_CARGO:  proof must be an ItemDepositedEvent tx.
+    // ── Standard verify & settle ───────────────────────────────────────────
+    //
+    // Use for single-executor missions:
+    //   DEFEND_BASE, DESTROY_TARGET, DELIVER_CARGO, PATROL_ZONE, ESCORT, SCOUT
+    //
+    // world_tx_proof: Sui tx digest (as bytes) of the world-contracts event
+    //   that proves mission completion.
+    //
     public fun verify_and_settle<T>(
         contract:       &mut MercenaryContract<T>,
         success:        bool,
@@ -65,7 +70,44 @@ module mercenary_exchange::verifier {
             world_tx_proof,
         });
 
-        // Trigger settlement — moves funds to executor or returns to issuer
-        contract::settle(contract, success, clock, ctx);
+        contract::settle(contract, success, world_tx_proof, clock, ctx);
+    }
+
+    // ── Tiered verify & settle ─────────────────────────────────────────────
+    //
+    // Use for multi-contributor missions: BOUNTY (7), PATROL_ZONE (4).
+    //
+    // executors:  ordered list of contributor addresses
+    //             [scout_addr, tackler_addr, killer_addr]
+    // shares_bps: basis-point share per contributor (must sum to 10000)
+    //             [1000,       2000,          7000]
+    //
+    public fun verify_and_settle_tiered<T>(
+        contract:       &mut MercenaryContract<T>,
+        executors:      vector<address>,
+        shares_bps:     vector<u64>,
+        world_tx_proof: vector<u8>,
+        clock:          &Clock,
+        _cap:           &VerifierCap,
+        ctx:            &mut TxContext,
+    ) {
+        let mission_type = contract::mission_type(contract);
+
+        event::emit(TieredVerificationSubmittedEvent {
+            contract_id: sui::object::id(contract),
+            mission_type,
+            executors,
+            shares_bps,
+            world_tx_proof,
+        });
+
+        contract::settle_tiered(
+            contract,
+            executors,
+            shares_bps,
+            world_tx_proof,
+            clock,
+            ctx,
+        );
     }
 }
