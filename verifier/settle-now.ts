@@ -83,7 +83,7 @@ async function main() {
 
   const tx = new Transaction();
   tx.moveCall({
-    target: `${PACKAGE_ID}::verifier::verify_and_settle`,
+    target: `${PACKAGE_ID}::verifier::verify_and_settle`, // update PACKAGE_ID after redeploy
     typeArguments: [COIN_TYPE],
     arguments: [
       tx.object(contractId),

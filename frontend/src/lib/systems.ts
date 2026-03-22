@@ -3,7 +3,8 @@
  * 24,502 systems — fetched live with debounced search.
  */
 
-export const SYSTEMS_API = "https://world-api-stillness.live.tech.evefrontier.com/v2/solarsystems";
+// Utopia (UAT) — the active test server for hackathon
+export const SYSTEMS_API = "https://world-api-utopia.uat.pub.evefrontier.com/v2/solarsystems";
 
 export interface SolarSystem {
   id: number;

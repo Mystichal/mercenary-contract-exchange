@@ -19,7 +19,8 @@ import { getAssemblyState } from "./graphql.ts";
 const PACKAGE_ID    = "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150";
 const VERIFIER_CAP  = "0x8e169780b1d77fa865c894208577f8cf083f981ad89a4b79d46dfdb939131020";
 const CLOCK_ID      = "0x6";
-const WORLD_PKG     = "0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75";
+// v0.0.21 Utopia published-at (use this for event type strings)
+const WORLD_PKG     = "0x07e6b810c2dff6df56ea7fbad9ff32f4d84cbee53e496267515887b712924bd1";
 const COIN_TYPE     = "0x2::sui::SUI";
 const POLL_MS       = 8_000;
 
