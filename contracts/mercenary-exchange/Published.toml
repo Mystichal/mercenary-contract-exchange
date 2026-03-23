@@ -1,15 +1,25 @@
-# Generated on deploy — 2026-03-11
-# Transaction: HtEo2BmHtBxQZs52TLvf9RtMWj1qaYW2QF823XwvHGhn
+# MCE — Published contract addresses
+# Generated after each deployment
 
-[published.testnet_utopia]
-chain-id = "4c78adac"
-published-at = "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150"
-original-id  = "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150"
-version = 1
-upgrade-capability = "0x55c965b220da6d2021c1600e5ba108de5c70fad0ad67d9f9e17f9d47fad53ec0"
+[published.testnet_utopia_v2]
+chain-id         = "4c78adac"
+published-at     = "0x769f425fddcdefa4877532aa773b23f4abcbd9f1abbd09183e8a972da609c781"
+tx-digest        = "8cKzE5b5m4DLSh7DDbvTRjdzWWe3HWjV5B4otxGFfKo1"
+registry         = "0x5bfe76bddf93f27668e999863ff9f10d2cbc69b1d7881c3305bbc407a23e087b"
+verifier-cap     = "0xa28a34ee2c05af1ca92618b5ae58001c4c296672d152c9e8f7cd1eee818c3438"
+admin-cap        = "0x4930fa6a45d0ac583f9d9567bed9d62367717006c524ea631dbd9de4aeabd5d1"
+upgrade-cap      = "0xc38e32d936fcd6aeeebc847df72d62be29c4bf8bc4a5b6e004a4ef1d48e5aea9"
+deployer         = "0x40589886ff1c4b7750ea8fa3df2bee8114dfeb7edf4aa6d86f7d20916c34fc85"
+world-pkg        = "0x07e6b810c2dff6df56ea7fbad9ff32f4d84cbee53e496267515887b712924bd1"
+world-version    = "v0.0.21"
+notes            = "v2 contracts: SCOUT+BOUNTY types, extra_data, tiered settlement"
 
-# Shared objects (required by frontend)
-registry-id   = "0xcd3f021b4714ce7c4d462deb1579434c711fe914a12eecbb31a224ac75990bf1"
-verifier-cap  = "0x8e169780b1d77fa865c894208577f8cf083f981ad89a4b79d46dfdb939131020"
-admin-cap     = "0x9faaee563c089942e75d48d12b30f1e08ebc638d3002b9bbea32b7bcf908fe2a"
-deployer      = "0x40589886ff1c4b7750ea8fa3df2bee8114dfeb7edf4aa6d86f7d20916c34fc85"
+[published.testnet_utopia_v1]
+chain-id         = "4c78adac"
+published-at     = "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150"
+tx-digest        = "HtEo2BmHtBxQZs52TLvf9RtMWj1qaYW2QF823XwvHGhn"
+registry         = "0xcd3f021b4714ce7c4d462deb1579434c711fe914a12eecbb31a224ac75990bf1"
+verifier-cap     = "0x8e169780b1d77fa865c894208577f8cf083f981ad89a4b79d46dfdb939131020"
+admin-cap        = "0x9faaee563c089942e75d48d12b30f1e08ebc638d3002b9bbea32b7bcf908fe2a"
+upgrade-cap      = "0x55c965b220da6d2021c1600e5ba108de5c70fad0ad67d9f9e17f9d47fad53ec0"
+notes            = "v1 contracts: initial deploy"

@@ -19,11 +19,11 @@ deps = { MoveStdlib = "MoveStdlib" }
 [pinned.testnet.mercenary_exchange]
 source = { root = true }
 use_environment = "testnet"
-manifest_digest = "1DE8899F516F30F521CCB9AE83327B4FFFA7640E3CD1DC5D5DC92E9A8CBD5109"
+manifest_digest = "29FB68CEE243CD4FFEAF6BF75F322463116B837F975A09B44A49D08F23EDC0D8"
 deps = { std = "MoveStdlib", sui = "Sui", world = "world" }
 
 [pinned.testnet.world]
-source = { git = "https://github.com/evefrontier/world-contracts.git", subdir = "contracts/world", rev = "8e2e97b50fd6bbf605284bcdaae54a33a5475e89" }
+source = { git = "https://github.com/evefrontier/world-contracts.git", subdir = "contracts/world", rev = "f761a7f61abc770f0ef802d1fba626ed6c48a216" }
 use_environment = "testnet"
 manifest_digest = "5745706258F61D6CE210904B3E6AE87A73CE9D31A6F93BE4718C442529332A87"
 deps = { std = "MoveStdlib", sui = "Sui" }

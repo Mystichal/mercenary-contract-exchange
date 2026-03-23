@@ -15,8 +15,9 @@ import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
 
-const PACKAGE_ID   = "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150";
-const VERIFIER_CAP = "0x8e169780b1d77fa865c894208577f8cf083f981ad89a4b79d46dfdb939131020";
+// v2 — world-contracts v0.0.21
+const PACKAGE_ID   = "0x769f425fddcdefa4877532aa773b23f4abcbd9f1abbd09183e8a972da609c781";
+const VERIFIER_CAP = "0xa28a34ee2c05af1ca92618b5ae58001c4c296672d152c9e8f7cd1eee818c3438";
 const CLOCK_ID     = "0x6";
 const COIN_TYPE    = "0x2::sui::SUI";
 
@@ -83,7 +84,7 @@ async function main() {
 
   const tx = new Transaction();
   tx.moveCall({
-    target: `${PACKAGE_ID}::verifier::verify_and_settle`, // update PACKAGE_ID after redeploy
+    target: `${PACKAGE_ID}::verifier::verify_and_settle`,
     typeArguments: [COIN_TYPE],
     arguments: [
       tx.object(contractId),

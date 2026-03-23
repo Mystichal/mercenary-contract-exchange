@@ -16,8 +16,9 @@ import { Transaction } from "@mysten/sui/transactions";
 import { getAssemblyState } from "./graphql.ts";
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const PACKAGE_ID    = "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150";
-const VERIFIER_CAP  = "0x8e169780b1d77fa865c894208577f8cf083f981ad89a4b79d46dfdb939131020";
+// v2 — world-contracts v0.0.21
+const PACKAGE_ID    = "0x769f425fddcdefa4877532aa773b23f4abcbd9f1abbd09183e8a972da609c781";
+const VERIFIER_CAP  = "0xa28a34ee2c05af1ca92618b5ae58001c4c296672d152c9e8f7cd1eee818c3438";
 const CLOCK_ID      = "0x6";
 // v0.0.21 Utopia published-at (use this for event type strings)
 const WORLD_PKG     = "0x07e6b810c2dff6df56ea7fbad9ff32f4d84cbee53e496267515887b712924bd1";
