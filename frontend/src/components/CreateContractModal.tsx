@@ -5,31 +5,47 @@ import { Transaction } from "@mysten/sui/transactions";
 import { PACKAGE_ID, CLOCK_ID, MISSION_TYPES } from "@/lib/config";
 import SystemInput from "./SystemInput";
 
-interface Props { onClose: () => void }
+interface Props {
+  onClose: () => void;
+  onSuccess?: () => void;
+}
 
-export default function CreateContractModal({ onClose }: Props) {
+// Mission types that need a target address
+const NEEDS_TARGET = new Set([2, 7]); // DESTROY_TARGET, BOUNTY
+
+export default function CreateContractModal({ onClose, onSuccess }: Props) {
   const account = useCurrentAccount();
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
 
   const [missionType, setMissionType] = useState(2);
   const [systemName, setSystemName] = useState("");
   const [systemId, setSystemId] = useState<number | null>(null);
+  const [targetAddress, setTargetAddress] = useState("");
   const [rewardSui, setRewardSui] = useState("");
   const [bondSui, setBondSui] = useState("");
   const [deadlineDays, setDeadlineDays] = useState("7");
   const [transferable, setTransferable] = useState(false);
   const [error, setError] = useState("");
 
+  const needsTarget = NEEDS_TARGET.has(missionType);
+
   function handleSubmit() {
     setError("");
     if (!account) return;
-    if (!systemId || !rewardSui || !bondSui) {
-      setError(!systemId ? "Select a solar system from the list" : "Fill in all fields");
-      return;
+    if (!systemId) { setError("Select a solar system from the list"); return; }
+    if (!rewardSui || !bondSui) { setError("Fill in reward and bond amounts"); return; }
+    if (needsTarget && !targetAddress.trim()) {
+      setError("Enter the target wallet address"); return;
     }
+
     const rewardMist = BigInt(Math.floor(parseFloat(rewardSui) * 1e9));
-    const bondMist = BigInt(Math.floor(parseFloat(bondSui) * 1e9));
+    const bondMist   = BigInt(Math.floor(parseFloat(bondSui)   * 1e9));
     const deadlineMs = BigInt(Date.now() + parseInt(deadlineDays) * 86_400_000);
+
+    // Encode extra_data: for target-based missions, encode address as UTF-8 bytes
+    const extraData: number[] = needsTarget && targetAddress.trim()
+      ? Array.from(new TextEncoder().encode(targetAddress.trim()))
+      : [];
 
     const tx = new Transaction();
     const [rc] = tx.splitCoins(tx.gas, [tx.pure.u64(rewardMist)]);
@@ -38,13 +54,18 @@ export default function CreateContractModal({ onClose }: Props) {
       target: `${PACKAGE_ID}::contract::create`,
       typeArguments: ["0x2::sui::SUI"],
       arguments: [
-        tx.pure.u8(missionType), tx.pure.vector("u8", []),
-        tx.pure.u64(BigInt(systemId)), tx.pure.u64(deadlineMs),
-        tx.pure.bool(transferable), rc, bc, tx.object(CLOCK_ID),
+        tx.pure.u8(missionType),
+        tx.pure.vector("u8", extraData),
+        tx.pure.u64(BigInt(systemId)),
+        tx.pure.u64(deadlineMs),
+        tx.pure.bool(transferable),
+        rc, bc,
+        tx.object(CLOCK_ID),
       ],
     });
+
     signAndExecute({ transaction: tx }, {
-      onSuccess: () => onClose(),
+      onSuccess: () => (onSuccess ?? onClose)(),
       onError: (e) => setError(e.message ?? "Transaction failed"),
     });
   }
@@ -53,16 +74,13 @@ export default function CreateContractModal({ onClose }: Props) {
     <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal-panel">
 
-        {/* Header */}
         <div className="modal-header">
           <div className="modal-header-text">
             <div className="modal-header-label">New Contract</div>
             <div className="modal-header-title">Issue Contract</div>
           </div>
           <button className="btn-ghost" onClick={onClose}
-            style={{ fontSize: 18, padding: "4px 8px" }}>
-            {"\u2715"}
-          </button>
+            style={{ fontSize: 18, padding: "4px 8px" }}>✕</button>
         </div>
 
         <div className="modal-body">
@@ -74,6 +92,7 @@ export default function CreateContractModal({ onClose }: Props) {
               {Object.entries(MISSION_TYPES).map(([k, v]) => (
                 <button key={k}
                   className={`mission-option${missionType === Number(k) ? " selected" : ""}`}
+                  style={missionType === Number(k) ? { borderColor: v.color, color: v.color } : {}}
                   onClick={() => setMissionType(Number(k))}>
                   {v.label}
                 </button>
@@ -89,6 +108,23 @@ export default function CreateContractModal({ onClose }: Props) {
               onChange={(n, id) => { setSystemName(n); setSystemId(id); }}
             />
           </div>
+
+          {/* Target address — only for DESTROY_TARGET / BOUNTY */}
+          {needsTarget && (
+            <div className="field">
+              <label className="field-label">
+                Target Wallet Address
+                <span style={{ color: "var(--text-dim)", fontWeight: 400, marginLeft: 6 }}>
+                  (Sui address of the target)
+                </span>
+              </label>
+              <input
+                placeholder="0x..."
+                value={targetAddress}
+                onChange={e => setTargetAddress(e.target.value)}
+              />
+            </div>
+          )}
 
           {/* Reward + Bond */}
           <div className="field">
@@ -117,7 +153,7 @@ export default function CreateContractModal({ onClose }: Props) {
           <div className={`checkbox-field${transferable ? " checked" : ""}`}
             onClick={() => setTransferable(!transferable)}>
             <div className="checkbox-box">
-              {transferable && <span style={{ color: "#fff", fontSize: 9, lineHeight: 1 }}>{"\u2713"}</span>}
+              {transferable && <span style={{ color: "#fff", fontSize: 9, lineHeight: 1 }}>✓</span>}
             </div>
             <span className="checkbox-label">Transferable Execution Rights</span>
           </div>

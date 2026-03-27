@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
 import ContractList from "@/components/ContractList";
 import CreateContractModal from "@/components/CreateContractModal";
@@ -14,6 +14,13 @@ export default function Home() {
   const account = useCurrentAccount();
   const [showCreate, setShowCreate] = useState(false);
   const [activeNav, setActiveNav] = useState("board");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleCreated = useCallback(() => {
+    setShowCreate(false);
+    // Delay slightly to allow Sui indexer to process the event
+    setTimeout(() => setRefreshKey(k => k + 1), 2000);
+  }, []);
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -61,11 +68,19 @@ export default function Home() {
             </div>
           </div>
 
-          <ContractList onCreateClick={() => setShowCreate(true)} />
+          <ContractList
+            onCreateClick={() => setShowCreate(true)}
+            refreshKey={refreshKey}
+          />
         </main>
       </div>
 
-      {showCreate && <CreateContractModal onClose={() => setShowCreate(false)} />}
+      {showCreate && (
+        <CreateContractModal
+          onClose={() => setShowCreate(false)}
+          onSuccess={handleCreated}
+        />
+      )}
     </div>
   );
 }

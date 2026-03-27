@@ -1,38 +1,29 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useSuiClientQuery, useSuiClient, useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { PACKAGE_ID, REGISTRY_ID, CLOCK_ID, MISSION_TYPES } from "@/lib/config";
-import { SYSTEMS_API } from "@/lib/systems";
+import { systemById } from "@/lib/systems";
 import { getCharacterByWallet } from "@/lib/graphql";
+import { useState } from "react";
 
 function useSystemName(id: number | undefined): string {
   const [name, setName] = useState<string>("");
   useEffect(() => {
     if (!id) return;
-    const offset = Math.max(0, id - 30000001);
-    fetch(`${SYSTEMS_API}?limit=10&offset=${offset}`)
-      .then(r => r.json())
-      .then(d => {
-        const sys = d.data?.find((s: { id: number; name: string }) => s.id === id);
-        if (sys) setName(sys.name);
-      }).catch(() => {});
+    systemById(id).then(s => { if (s) setName(s.name); });
   }, [id]);
-  return name || (id ? `#${id}` : "\u2014");
+  return name || (id ? `#${id}` : "—");
 }
 
-/** Resolve a wallet address to an EVE character ID for display */
 function useCharacter(walletAddress: string | undefined): string {
   const [label, setLabel] = useState<string>("");
   useEffect(() => {
     if (!walletAddress) return;
     getCharacterByWallet(walletAddress)
-      .then(c => {
-        if (c) setLabel(`${c.characterId.slice(0, 8)}…`);
-      })
+      .then(c => { if (c) setLabel(`${c.characterId.slice(0, 8)}…`); })
       .catch(() => {});
   }, [walletAddress]);
-  // Fallback to shortened wallet if no character found
   return label || (walletAddress ? `${walletAddress.slice(0, 8)}…${walletAddress.slice(-6)}` : "—");
 }
 
@@ -53,7 +44,6 @@ function useLiveStatus(contractId: string | undefined): number | null {
 const STATUS_LABEL: Record<number, string> = { 0: "OPEN", 1: "ACTIVE", 2: "COMPLETED", 3: "FAILED", 4: "DISPUTED" };
 const STATUS_CLASS: Record<number, string> = { 0: "open", 1: "active", 2: "completed", 3: "failed", 4: "disputed" };
 
-// ── Contract Row ────────────────────────────────────────────────────────────────
 function ContractRow({ ev, onAccept }: {
   ev: { id: { txDigest: string }; parsedJson: unknown };
   onAccept: (contractId: string) => void;
@@ -75,20 +65,15 @@ function ContractRow({ ev, onAccept }: {
 
   return (
     <div className="contract-row">
-      <div className="contract-type">{mType.label}</div>
-
+      <div className="contract-type" style={{ color: mType.color }}>{mType.label}</div>
       <div>
         <div className="contract-location">{systemName}</div>
-        <div className="contract-issuer">
-          {issuerLabel}
-        </div>
+        <div className="contract-issuer">{issuerLabel}</div>
       </div>
-
       <div className="contract-reward">
         <div className="contract-reward-value">{reward}</div>
         <div className="contract-reward-unit">SUI</div>
       </div>
-
       <div className="contract-status">
         <span className={`status-badge ${statusClass}`}>
           <svg className="status-dot" viewBox="0 0 6 6" xmlns="http://www.w3.org/2000/svg">
@@ -97,7 +82,6 @@ function ContractRow({ ev, onAccept }: {
           <span className="status-text">{statusLabel}</span>
         </span>
       </div>
-
       <div className="contract-action">
         {account && isOpen ? (
           <button className="btn-primary" onClick={() => onAccept(contractId)}
@@ -110,18 +94,32 @@ function ContractRow({ ev, onAccept }: {
   );
 }
 
-// ── Main ────────────────────────────────────────────────────────────────────────
-interface Props { onCreateClick: () => void }
+interface Props {
+  onCreateClick: () => void;
+  refreshKey?: number;
+}
 
-export default function ContractList({ onCreateClick }: Props) {
+export default function ContractList({ onCreateClick, refreshKey }: Props) {
   const account = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
-  const { data: events, refetch, isLoading } = useSuiClientQuery("queryEvents", {
-    query: { MoveEventType: `${PACKAGE_ID}::contract::ContractCreatedEvent` },
-    limit: 50,
-    order: "descending",
-  });
+  const { data: events, refetch, isLoading } = useSuiClientQuery(
+    "queryEvents",
+    {
+      query: { MoveEventType: `${PACKAGE_ID}::contract::ContractCreatedEvent` },
+      limit: 50,
+      order: "descending",
+    },
+    {
+      // Auto-poll every 10s so new contracts appear without refresh
+      refetchInterval: 10_000,
+    }
+  );
+
+  // Trigger immediate refetch when parent signals a new contract was created
+  useEffect(() => {
+    if (refreshKey) refetch();
+  }, [refreshKey, refetch]);
 
   void useSuiClientQuery("getObject", { id: REGISTRY_ID, options: { showContent: true } });
 
@@ -139,16 +137,14 @@ export default function ContractList({ onCreateClick }: Props) {
 
   if (isLoading) return (
     <div className="loading-state">
-      <div className="loading-bar">
-        <span /><span /><span /><span />
-      </div>
+      <div className="loading-bar"><span /><span /><span /><span /></div>
       <div className="loading-text">Scanning contracts...</div>
     </div>
   );
 
   if (contracts.length === 0) return (
     <div className="empty-state">
-      <div className="empty-state-icon">{"\u2302"}</div>
+      <div className="empty-state-icon">⌂</div>
       <div className="empty-state-text">No contracts on board</div>
       {account && (
         <button className="btn-primary" onClick={onCreateClick}
