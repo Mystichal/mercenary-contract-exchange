@@ -62,6 +62,8 @@ function ContractRow({ ev, onAccept }: {
   const statusLabel = liveStatus !== null ? (STATUS_LABEL[liveStatus] ?? "?") : "...";
   const statusClass = liveStatus !== null ? (STATUS_CLASS[liveStatus] ?? "") : "";
   const isOpen = liveStatus === 0;
+  // Can't accept your own contract
+  const canAccept = isOpen && account?.address !== issuer;
 
   return (
     <div className="contract-row">
@@ -83,7 +85,7 @@ function ContractRow({ ev, onAccept }: {
         </span>
       </div>
       <div className="contract-action">
-        {account && isOpen ? (
+        {account && canAccept ? (
           <button className="btn-primary" onClick={() => onAccept(contractId)}
             style={{ padding: "6px 14px", fontSize: 9 }}>
             Accept
@@ -97,9 +99,10 @@ function ContractRow({ ev, onAccept }: {
 interface Props {
   onCreateClick: () => void;
   refreshKey?: number;
+  filterMine?: boolean;
 }
 
-export default function ContractList({ onCreateClick, refreshKey }: Props) {
+export default function ContractList({ onCreateClick, refreshKey, filterMine }: Props) {
   const account = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
@@ -133,7 +136,13 @@ export default function ContractList({ onCreateClick, refreshKey }: Props) {
     signAndExecute({ transaction: tx }, { onSuccess: () => refetch() });
   }
 
-  const contracts = events?.data ?? [];
+  const allContracts = events?.data ?? [];
+  const contracts = filterMine && account
+    ? allContracts.filter(ev => {
+        const p = ev.parsedJson as Record<string, unknown>;
+        return (p?.issuer as string) === account.address;
+      })
+    : allContracts;
 
   if (isLoading) return (
     <div className="loading-state">

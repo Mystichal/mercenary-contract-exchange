@@ -71,6 +71,7 @@ export default function Home() {
           <ContractList
             onCreateClick={() => setShowCreate(true)}
             refreshKey={refreshKey}
+            filterMine={activeNav === "mine"}
           />
         </main>
       </div>
