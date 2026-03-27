@@ -92,7 +92,6 @@ export default function CreateContractModal({ onClose, onSuccess }: Props) {
               {Object.entries(MISSION_TYPES).map(([k, v]) => (
                 <button key={k}
                   className={`mission-option${missionType === Number(k) ? " selected" : ""}`}
-                  style={missionType === Number(k) ? { borderColor: v.color, color: v.color } : {}}
                   onClick={() => setMissionType(Number(k))}>
                   {v.label}
                 </button>
