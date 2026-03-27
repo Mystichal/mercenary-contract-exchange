@@ -1,0 +1,36 @@
+networks:
+  traefik-public:
+    external: true
+
+services:
+
+  # ── MCE Frontend ─────────────────────────────────────────────────────────────
+  mce-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: mce-frontend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    networks:
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.mce.rule=Host(`mce.local`)"
+      - "traefik.http.routers.mce.entrypoints=web"
+      - "traefik.http.services.mce.loadbalancer.server.port=3001"
+
+  # ── MCE Verifier ─────────────────────────────────────────────────────────────
+  mce-verifier:
+    build:
+      context: .
+      dockerfile: Dockerfile.verifier
+    container_name: mce-verifier
+    restart: unless-stopped
+    environment:
+      # Set this to the base64 or bech32 private key of the wallet holding VerifierCap
+      VERIFIER_PRIVATE_KEY: "${VERIFIER_PRIVATE_KEY}"
+    networks:
+      - traefik-public

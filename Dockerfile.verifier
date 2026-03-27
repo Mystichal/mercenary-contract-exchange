@@ -1,0 +1,9 @@
+FROM node:22-slim
+WORKDIR /app
+
+COPY verifier/package*.json ./
+RUN npm install
+
+COPY verifier/ ./
+
+CMD ["node", "--experimental-strip-types", "verifier.ts"]

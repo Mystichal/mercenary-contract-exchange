@@ -16,16 +16,16 @@ import type { SuiEvent } from "@mysten/sui/client";
 // TODO: update these after deploying to hackathon network on March 11
 export const CONFIG = {
     network:      "testnet" as const,
-    packageId:    "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150",
-    registryId:   "0xcd3f021b4714ce7c4d462deb1579434c711fe914a12eecbb31a224ac75990bf1", // Shared
-    verifierCapId: "0x8e169780b1d77fa865c894208577f8cf083f981ad89a4b79d46dfdb939131020",
-    adminCapId:   "0x9faaee563c089942e75d48d12b30f1e08ebc638d3002b9bbea32b7bcf908fe2a",
+    packageId:    "0x769f425fddcdefa4877532aa773b23f4abcbd9f1abbd09183e8a972da609c781",
+    registryId:   "0x5bfe76bddf93f27668e999863ff9f10d2cbc69b1d7881c3305bbc407a23e087b", // Shared
+    verifierCapId: "0xa28a34ee2c05af1ca92618b5ae58001c4c296672d152c9e8f7cd1eee818c3438",
+    adminCapId:   "0x4930fa6a45d0ac583f9d9567bed9d62367717006c524ea631dbd9de4aeabd5d1",
     upgradeCap:   "0x55c965b220da6d2021c1600e5ba108de5c70fad0ad67d9f9e17f9d47fad53ec0",
     deployerAddress: "0x40589886ff1c4b7750ea8fa3df2bee8114dfeb7edf4aa6d86f7d20916c34fc85",
     deployTxDigest: "HtEo2BmHtBxQZs52TLvf9RtMWj1qaYW2QF823XwvHGhn",
 
     // EVE Frontier world-contracts — testnet_utopia deployment
-    worldContractsPackage: "0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75",
+    worldContractsPackage: "0x07e6b810c2dff6df56ea7fbad9ff32f4d84cbee53e496267515887b712924bd1",
 
     // Poll interval for world event monitoring
     pollIntervalMs: 8_000,
