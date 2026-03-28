@@ -45,6 +45,12 @@ module mercenary_exchange::verifier {
         transfer::transfer(VerifierCap { id: object::new(ctx) }, ctx.sender());
     }
 
+    /// Test-only init: allows tests to bootstrap a VerifierCap without deploying.
+    #[test_only]
+    public fun init_for_testing(ctx: &mut TxContext) {
+        init(ctx);
+    }
+
     // ── Standard verify & settle ───────────────────────────────────────────
     //
     // Use for single-executor missions:
