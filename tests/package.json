@@ -1,0 +1,16 @@
+{
+  "name": "mce-e2e-tests",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "MCE end-to-end contract lifecycle tests",
+  "scripts": {
+    "test": "node --experimental-strip-types e2e.ts",
+    "test:live": "node --experimental-strip-types e2e.ts"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
