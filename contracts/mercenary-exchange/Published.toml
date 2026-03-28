@@ -2,6 +2,7 @@
 # Generated after each deployment
 
 [published.testnet_utopia_v2]
+version          = "1"
 chain-id         = "4c78adac"
 published-at     = "0x769f425fddcdefa4877532aa773b23f4abcbd9f1abbd09183e8a972da609c781"
 tx-digest        = "8cKzE5b5m4DLSh7DDbvTRjdzWWe3HWjV5B4otxGFfKo1"
@@ -15,6 +16,7 @@ world-version    = "v0.0.21"
 notes            = "v2 contracts: SCOUT+BOUNTY types, extra_data, tiered settlement"
 
 [published.testnet_utopia_v1]
+version          = "1"
 chain-id         = "4c78adac"
 published-at     = "0x2f0acb41d5b24aa14723c9f7b37cdb2d0bbd656b2b33556cc4a86f05d93c3150"
 tx-digest        = "HtEo2BmHtBxQZs52TLvf9RtMWj1qaYW2QF823XwvHGhn"
