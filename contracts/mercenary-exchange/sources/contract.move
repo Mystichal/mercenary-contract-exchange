@@ -13,15 +13,15 @@ module mercenary_exchange::contract {
 
     // ── Error codes ────────────────────────────────────────────────────────
     // NOTE: constants used in #[expected_failure] attributes must be public.
-    public(package) const ENotIssuer:          u64 = 100;
-    public(package) const EAlreadyAccepted:    u64 = 101;
-    public(package) const EDeadlinePassed:     u64 = 102;
-    public(package) const ENotExecutor:        u64 = 103;
-    public(package) const ENotActive:          u64 = 104;
-    public(package) const EWrongMissionType:   u64 = 105;
-    public(package) const ESharesMismatch:     u64 = 106; // tiered payout arrays unequal length
-    public(package) const ESharesNotFull:      u64 = 107; // tiered shares don't sum to 10000 bps
-    public(package) const EIssuerCannotAccept: u64 = 108; // issuer may not accept their own contract
+    const ENotIssuer:          u64 = 100;
+    const EAlreadyAccepted:    u64 = 101;
+    const EDeadlinePassed:     u64 = 102;
+    const ENotExecutor:        u64 = 103;
+    const ENotActive:          u64 = 104;
+    const EWrongMissionType:   u64 = 105;
+    const ESharesMismatch:     u64 = 106; // tiered payout arrays unequal length
+    const ESharesNotFull:      u64 = 107; // tiered shares don't sum to 10000 bps
+    const EIssuerCannotAccept: u64 = 108; // issuer may not accept their own contract
 
     // ── Mission types ──────────────────────────────────────────────────────
     //
