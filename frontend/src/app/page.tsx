@@ -5,9 +5,9 @@ import ContractList from "@/components/ContractList";
 import CreateContractModal from "@/components/CreateContractModal";
 
 const NAV_ITEMS = [
-  { label: "CONTRACT BOARD", key: "board" },
-  { label: "MY CONTRACTS",   key: "mine" },
-  { label: "TRANSACTIONS",   key: "tx" },
+  { label: "Contract Board", key: "board", breadcrumb: "Contract Board", title: "Open Contracts" },
+  { label: "My Contracts",   key: "mine",  breadcrumb: "My Contracts",   title: "Issued by Me" },
+  { label: "Transactions",   key: "tx",    breadcrumb: "Transactions",   title: "TX History" },
 ];
 
 export default function Home() {
@@ -56,10 +56,14 @@ export default function Home() {
         {/* ── Main ─────────────────────────────────────────────────── */}
         <main className="main-content">
           <div className="page-header">
-            <div className="page-breadcrumb">Contract Board</div>
+            <div className="page-breadcrumb">
+              {NAV_ITEMS.find(n => n.key === activeNav)?.breadcrumb ?? "Contract Board"}
+            </div>
             <div className="page-title-row">
-              <h1 className="page-title">Open Contracts</h1>
-              {account && (
+              <h1 className="page-title">
+                {NAV_ITEMS.find(n => n.key === activeNav)?.title ?? "Open Contracts"}
+              </h1>
+              {account && activeNav !== "tx" && (
                 <button className="btn-primary" onClick={() => setShowCreate(true)}
                   style={{ padding: "9px 20px", fontSize: 10 }}>
                   + Issue Contract
@@ -68,11 +72,18 @@ export default function Home() {
             </div>
           </div>
 
-          <ContractList
-            onCreateClick={() => setShowCreate(true)}
-            refreshKey={refreshKey}
-            filterMine={activeNav === "mine"}
-          />
+          {activeNav === "tx" ? (
+            <div className="placeholder-panel">
+              <div className="placeholder-panel-icon">⧖</div>
+              <div className="placeholder-panel-text">Transaction history coming soon</div>
+            </div>
+          ) : (
+            <ContractList
+              onCreateClick={() => setShowCreate(true)}
+              refreshKey={refreshKey}
+              filterMine={activeNav === "mine"}
+            />
+          )}
         </main>
       </div>
 
