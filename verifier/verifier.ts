@@ -55,6 +55,7 @@ interface ActiveContract {
   executor: string | null;
   issuer: string;
   deadline: bigint;
+  assemblyId?: string;  // hex object ID, decoded from extra_data for DEFEND_BASE / DESTROY_TARGET
 }
 
 async function fetchActiveContracts(): Promise<ActiveContract[]> {
@@ -82,13 +83,39 @@ async function fetchActiveContracts(): Promise<ActiveContract[]> {
       // Watch OPEN (0) and ACTIVE (1) — skip settled/failed
       if (status > 1) continue;
 
+      const missionType = Number(p.mission_type ?? 0);
+
+      // Decode extra_data: for DEFEND_BASE (1) and DESTROY_TARGET (2),
+      // extra_data is BCS bytes of a u64 assembly_id → interpret as a Sui object address (hex)
+      let assemblyId: string | undefined;
+      const extraDataRaw = fields.extra_data ?? p.extra_data;
+      if ((missionType === MISSION_DEFEND || missionType === MISSION_DESTROY) && extraDataRaw) {
+        try {
+          // extra_data arrives as array of numbers (bytes)
+          const bytes = Array.isArray(extraDataRaw)
+            ? (extraDataRaw as number[])
+            : Object.values(extraDataRaw as Record<string, number>);
+          if (bytes.length >= 8) {
+            // BCS u64 is little-endian 8 bytes — but Sui object IDs are 32-byte hex addresses
+            // If extra_data is 32 bytes it's a raw Sui address; if 8 bytes it's a u64 object ID
+            const hex = bytes.length === 32
+              ? '0x' + bytes.map(b => b.toString(16).padStart(2, '0')).join('')
+              : '0x' + [...bytes].reverse().map(b => b.toString(16).padStart(2, '0')).join('').padStart(64, '0');
+            assemblyId = hex;
+          }
+        } catch {
+          // ignore decode errors
+        }
+      }
+
       contracts.push({
         contractId,
-        missionType:   Number(p.mission_type ?? 0),
+        missionType,
         solarSystemId: BigInt(p.solar_system_id as string ?? "0"),
         executor:      (fields.executor as { fields?: { vec?: string[] } })?.fields?.vec?.[0] ?? null,
         issuer:        p.issuer as string,
         deadline:      BigInt(p.deadline_ms as string ?? "0"),
+        assemblyId,
       });
     } catch {
       // Object might not exist yet, skip
