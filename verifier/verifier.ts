@@ -5,7 +5,7 @@
  * When a world event matches an active contract's mission,
  * calls verify_and_settle to pay out the executor automatically.
  *
- * Run: node --experimental-strip-types verifier.ts
+ * Run: npx tsx verifier.ts
  *
  * Requires: VERIFIER_PRIVATE_KEY env var (base64 or bech32 Sui private key)
  */
@@ -13,7 +13,6 @@
 import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
-import { getAssemblyState } from "./graphql.ts";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 // v2 — world-contracts v0.0.21
@@ -34,6 +33,7 @@ const MISSION_DELIVER = 3;
 const EVENT_KILLMAIL  = `${WORLD_PKG}::killmail::KillmailCreatedEvent`;
 const EVENT_STATUS    = `${WORLD_PKG}::status::StatusChangedEvent`;
 const EVENT_DEPOSIT   = `${WORLD_PKG}::inventory::ItemDepositedEvent`;
+const EVENT_JUMP      = `${WORLD_PKG}::gate::JumpEvent`;
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
 const client = new SuiClient({ url: getFullnodeUrl("testnet") });
@@ -55,7 +55,7 @@ interface ActiveContract {
   executor: string | null;
   issuer: string;
   deadline: bigint;
-  assemblyId?: string;  // hex object ID, decoded from extra_data for DEFEND_BASE / DESTROY_TARGET
+  assemblyId?: string; // hex object ID, decoded from extra_data for DEFEND_BASE / DESTROY_TARGET
 }
 
 async function fetchActiveContracts(): Promise<ActiveContract[]> {
@@ -99,8 +99,8 @@ async function fetchActiveContracts(): Promise<ActiveContract[]> {
             // BCS u64 is little-endian 8 bytes — but Sui object IDs are 32-byte hex addresses
             // If extra_data is 32 bytes it's a raw Sui address; if 8 bytes it's a u64 object ID
             const hex = bytes.length === 32
-              ? '0x' + bytes.map(b => b.toString(16).padStart(2, '0')).join('')
-              : '0x' + [...bytes].reverse().map(b => b.toString(16).padStart(2, '0')).join('').padStart(64, '0');
+              ? '0x' + bytes.map((b: number) => b.toString(16).padStart(2, '0')).join('')
+              : '0x' + [...bytes].reverse().map((b: number) => b.toString(16).padStart(2, '0')).join('').padStart(64, '0');
             assemblyId = hex;
           }
         } catch {
@@ -140,15 +140,32 @@ function matchesContract(
 
   // DEFEND_BASE: StatusChangedEvent showing assembly is ONLINE in correct system
   if (contract.missionType === MISSION_DEFEND && eventType === EVENT_STATUS) {
-    const evSystem = BigInt((eventData.solar_system_id as string) ?? "0");
-    const status   = String(eventData.status ?? "");
-    return evSystem === contract.solarSystemId && status.toLowerCase().includes("online");
+    const evAssemblyId = String(
+      (eventData.assembly_id as Record<string, string>)?.id ?? eventData.assembly_id ?? ""
+    );
+    if (contract.assemblyId) {
+      return evAssemblyId.toLowerCase() === contract.assemblyId.toLowerCase();
+    }
+    const status = String(eventData.status ?? "");
+    return status.toLowerCase().includes("online");
   }
 
-  // DELIVER_CARGO: ItemDepositedEvent — match by assembly/solar_system
+  // DELIVER_CARGO: ItemDepositedEvent — match by assembly_id from extra_data
   if (contract.missionType === MISSION_DELIVER && eventType === EVENT_DEPOSIT) {
+    if (contract.assemblyId) {
+      const evAssemblyId = String(
+        (eventData.assembly_id as Record<string, string>)?.id ?? eventData.assembly_id ?? ""
+      );
+      return evAssemblyId.toLowerCase() === contract.assemblyId.toLowerCase();
+    }
+    // Fallback: match by solar system (less precise)
     const evSystem = BigInt((eventData.solar_system_id as string) ?? "0");
     return evSystem === contract.solarSystemId;
+  }
+
+  // JumpEvent — currently not used for auto-settlement but logged
+  if (eventType === EVENT_JUMP) {
+    return false;
   }
 
   return false;
@@ -163,6 +180,17 @@ async function settle(
 ) {
   console.log(`[verifier] Settling contract ${contract.contractId} success=${success} proof=${proofTxDigest}`);
 
+  // Convert tx digest (base58/base64) to 32-byte vector for on-chain proof
+  let proofBytes: number[];
+  try {
+    // Sui tx digests are base58-encoded 32-byte hashes
+    const buf = Buffer.from(proofTxDigest, "base64");
+    proofBytes = Array.from(buf.subarray(0, 32));
+    while (proofBytes.length < 32) proofBytes.push(0);
+  } catch {
+    proofBytes = new Array(32).fill(0);
+  }
+
   const tx = new Transaction();
   tx.moveCall({
     target: `${PACKAGE_ID}::verifier::verify_and_settle`,
@@ -170,7 +198,7 @@ async function settle(
     arguments: [
       tx.object(contract.contractId),
       tx.pure.bool(success),
-      tx.pure.vector("u8", Array.from(Buffer.from(proofTxDigest, "base64").slice(0, 32).padEnd(32, 0))),
+      tx.pure.vector("u8", proofBytes),
       tx.object(CLOCK_ID),
       tx.object(VERIFIER_CAP),
     ],
@@ -186,48 +214,13 @@ async function settle(
   return result;
 }
 
-// ── Direct state polling (DEFEND_BASE fallback) ───────────────────────────────
-/**
- * For DEFEND_BASE contracts, the StatusChangedEvent may have fired before the
- * verifier started watching (e.g. assembly was already online when contract was
- * accepted). This polls the assembly object's live state via GraphQL as a fallback.
- *
- * Requires the contract's target_assembly_id field to be set.
- */
-async function pollAssemblyState(
-  contracts: ActiveContract[],
-  keypair: Ed25519Keypair,
-): Promise<void> {
-  const defendContracts = contracts.filter(c => c.missionType === MISSION_DEFEND);
-  if (!defendContracts.length) return;
-
-  for (const contract of defendContracts) {
-    const assemblyId = (contract as ActiveContract & { assemblyId?: string }).assemblyId;
-    if (!assemblyId) continue;
-
-    try {
-      const state = await getAssemblyState(assemblyId);
-      if (!state) continue;
-
-      const systemMatch = state.solarSystemId === contract.solarSystemId;
-      if (state.isOnline && systemMatch) {
-        console.log(`[verifier] DEFEND_BASE match via GraphQL state poll — assembly ${assemblyId} is ONLINE`);
-        await settle(contract, assemblyId, true, keypair);
-        contracts.splice(contracts.indexOf(contract), 1);
-      }
-    } catch (e) {
-      console.warn(`[verifier] Assembly state poll failed for ${assemblyId}:`, e);
-    }
-  }
-}
-
 // ── Polling loop ──────────────────────────────────────────────────────────────
 async function poll(
   cursors: Map<string, string | null>,
   contracts: ActiveContract[],
   keypair: Ed25519Keypair,
 ) {
-  const eventTypes = [EVENT_KILLMAIL, EVENT_STATUS, EVENT_DEPOSIT];
+  const eventTypes = [EVENT_KILLMAIL, EVENT_STATUS, EVENT_DEPOSIT, EVENT_JUMP];
 
   for (const eventType of eventTypes) {
     const cursor = cursors.get(eventType) ?? null;
@@ -255,7 +248,8 @@ async function poll(
           try {
             await settle(contract, ev.id.txDigest, true, keypair);
             // Remove from watch list after settlement
-            contracts.splice(contracts.indexOf(contract), 1);
+            const idx = contracts.indexOf(contract);
+            if (idx !== -1) contracts.splice(idx, 1);
           } catch (e) {
             console.error(`[verifier] Settlement failed:`, e);
           }
@@ -268,8 +262,8 @@ async function poll(
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
   console.log("=== Mercenary Contract Verifier ===");
-  console.log(`Package:      ${PACKAGE_ID}`);
-  console.log(`VerifierCap:  ${VERIFIER_CAP}`);
+  console.log(`Package:       ${PACKAGE_ID}`);
+  console.log(`VerifierCap:   ${VERIFIER_CAP}`);
   console.log(`Poll interval: ${POLL_MS}ms`);
 
   const keypair  = loadKeypair();
@@ -278,18 +272,13 @@ async function main() {
   const cursors: Map<string, string | null> = new Map();
   let contracts = await fetchActiveContracts();
 
-  // Refresh contract list every 60 seconds
   let lastRefresh = Date.now();
 
   console.log("\nWatching for world events...\n");
 
   while (true) {
     try {
-      // Event-based polling (all mission types)
       await poll(cursors, contracts, keypair);
-
-      // Direct GraphQL state poll for DEFEND_BASE (catches already-online assemblies)
-      await pollAssemblyState(contracts, keypair);
 
       // Refresh contract list every 15s to catch newly accepted contracts
       if (Date.now() - lastRefresh > 15_000) {

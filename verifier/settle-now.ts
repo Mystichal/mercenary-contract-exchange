@@ -1,12 +1,12 @@
 /**
  * settle-now.ts — Manual settlement trigger for testing
  *
- * Fetches all OPEN/ACTIVE contracts and settles the first one as successful.
+ * Fetches all OPEN/ACTIVE contracts and settles the specified one as successful.
  * Simulates what the verifier does after a world event match.
  *
  * Usage:
  *   export VERIFIER_PRIVATE_KEY="<key>"
- *   node --experimental-strip-types settle-now.ts [contract-id]
+ *   npx tsx settle-now.ts <contract-id>
  *
  * If no contract-id is provided, settles the first active contract found.
  */
@@ -70,14 +70,19 @@ async function main() {
 
   console.log(`Signer: ${keypair.getPublicKey().toSuiAddress()}`);
 
+  if (targetId) {
+    console.log(`Looking for contract: ${targetId}`);
+  } else {
+    console.log("No contract ID specified — finding first active contract...");
+  }
+
   const contractId = await findActiveContract(targetId);
   if (!contractId) {
     console.error("No active contract found.");
     process.exit(1);
   }
 
-  // Fake proof: just use 32 zero bytes — this is a trust-based MVP,
-  // the VerifierCap holder is trusted to only submit valid proofs
+  // Fake proof: 32 zero bytes — trust-based MVP, VerifierCap holder is trusted
   const fakeProof = new Array(32).fill(0);
 
   console.log(`\nSettling ${contractId} as SUCCESS...`);

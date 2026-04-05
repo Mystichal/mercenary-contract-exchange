@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "start": "node --experimental-strip-types verifier.ts",
-    "start:js": "node verifier.js"
+    "start": "npx tsx verifier.ts",
+    "settle": "npx tsx settle-now.ts"
   },
   "dependencies": {
-    "@mysten/sui": "^1.0.0"
+    "@mysten/sui": "^1.0.0",
+    "tsx": "^4.0.0"
   }
 }

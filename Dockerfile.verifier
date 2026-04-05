@@ -6,4 +6,4 @@ RUN npm install
 
 COPY verifier/ ./
 
-CMD ["node", "--experimental-strip-types", "verifier.ts"]
+CMD ["npx", "tsx", "verifier.ts"]
