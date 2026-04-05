@@ -21,7 +21,14 @@ function useCharacter(walletAddress: string | undefined): string {
   useEffect(() => {
     if (!walletAddress) return;
     getCharacterByWallet(walletAddress)
-      .then(c => { if (c) setLabel(`${c.characterId.slice(0, 8)}…`); })
+      .then(c => {
+        if (!c) return;
+        if (c.name) {
+          setLabel(c.name);
+        } else {
+          setLabel(`${c.characterId.slice(0, 8)}…`);
+        }
+      })
       .catch(() => {});
   }, [walletAddress]);
   return label || (walletAddress ? `${walletAddress.slice(0, 8)}…${walletAddress.slice(-6)}` : "—");

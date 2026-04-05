@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
 import ContractList from "@/components/ContractList";
 import CreateContractModal from "@/components/CreateContractModal";
+import TransactionHistory from "@/components/TransactionHistory";
 
 const NAV_ITEMS = [
   { label: "Contract Board", key: "board", breadcrumb: "Contract Board", title: "Open Contracts" },
@@ -73,10 +74,7 @@ export default function Home() {
           </div>
 
           {activeNav === "tx" ? (
-            <div className="placeholder-panel">
-              <div className="placeholder-panel-icon">⧖</div>
-              <div className="placeholder-panel-text">Transaction history coming soon</div>
-            </div>
+            <TransactionHistory />
           ) : (
             <ContractList
               onCreateClick={() => setShowCreate(true)}
