@@ -1,7 +1,3 @@
-networks:
-  traefik-public:
-    external: true
-
 services:
 
   # ── MCE Frontend ─────────────────────────────────────────────────────────────
@@ -12,17 +8,9 @@ services:
     container_name: mce-frontend
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - "3000:3000"
     env_file:
       - .env
-    networks:
-      - traefik-public
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.mce.rule=Host(`mce.local`)"
-      - "traefik.http.routers.mce.entrypoints=web"
-      - "traefik.http.services.mce.loadbalancer.server.port=3000"
 
   # ── MCE Verifier ─────────────────────────────────────────────────────────────
   verifier:
@@ -33,7 +21,5 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    networks:
-      - traefik-public
     depends_on:
       - frontend
